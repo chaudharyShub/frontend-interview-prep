@@ -428,80 +428,92 @@ window.QUESTIONS = [
         "a": "All three set `this` for a function:\n- **`call(thisArg, a, b)`**: invokes immediately, args one by one.\n- **`apply(thisArg, [a, b])`**: invokes immediately, args as an array.\n- **`bind(thisArg, a)`**: does **not** invoke; returns a new function with `this` (and optionally some args) permanently bound.\n```js\nfunction greet(greeting, punct) { return `${greeting}, ${this.name}${punct}`; }\nconst user = { name: 'Sam' };\ngreet.call(user, 'Hi', '!');      // \"Hi, Sam!\"\ngreet.apply(user, ['Hello', '.']); // \"Hello, Sam.\"\nconst g = greet.bind(user, 'Hey'); g('?'); // \"Hey, Sam?\"\n```\nUse cases: borrowing methods (`Math.max.apply(null, arr)`), binding handlers in class components, partial application."
       },
       {
-        "id": "66",
+        "id": "cb1",
         "n": 66,
+        "q": "What happens if you bind() an already bound function, or call it with call()/apply()?",
+        "a": "A bound function's `this` is **fixed permanently**. Later attempts to change it are ignored:\n```js\nfunction show() { return this.name; }\nconst a = { name: 'A' }, b = { name: 'B' };\n\nconst boundA = show.bind(a);\nboundA.call(b);   // \"A\" – call/apply can't override it\nboundA.bind(b)(); // \"A\" – the second bind's this is ignored\n```\n- Extra **arguments** from a second `bind` are still added: `add.bind(null, 1).bind(null, 2)()` passes `1, 2`.\n- **`new` wins**: calling a bound function with `new` ignores the bound `this` and creates a new object (bound arguments are still used).\n- **Arrow functions** have no own `this`, so `call`, `apply` and `bind` can't change it; only the arguments are passed.\n\nPrecedence for `this`: `new` > explicit binding (`bind`/`call`/`apply`) > method call (`obj.fn()`) > default (`undefined` in strict mode, `globalThis` otherwise)."
+      },
+      {
+        "id": "cb2",
+        "n": 67,
+        "q": "Why does a method lose its this context when passed as a callback, and how do you fix it?",
+        "a": "`this` is decided by **how a function is called**, not where it is defined. Passing `obj.method` as a callback passes only the function, so it is later called without its object:\n```js\nconst counter = {\n  count: 0,\n  inc() { this.count++; },\n};\nsetTimeout(counter.inc, 0);                    // this is window, not counter – bug\nbutton.addEventListener('click', counter.inc); // this is the button – bug\n```\nFixes:\n- **`bind`**: `setTimeout(counter.inc.bind(counter), 0)`\n- **Arrow wrapper**: `setTimeout(() => counter.inc(), 0)`\n- **Arrow class fields** (bound per instance): `handleClick = () => { ... }`. This is the usual fix in React class components, instead of `this.handleClick = this.handleClick.bind(this)` in the constructor.\n\nNote: calling `bind` (or creating an arrow) inside render makes a new function every time, which can defeat `React.memo` / `PureComponent` optimisations."
+      },
+      {
+        "id": "66",
+        "n": 68,
         "q": "What is event bubbling and event capturing?",
         "a": "When an event fires on an element, it travels in three phases:\n1. **Capturing**: from `window` down through ancestors to the target.\n2. **Target** phase.\n3. **Bubbling**: from the target back up to `window`.\n`addEventListener(type, handler)` listens in the bubbling phase by default; pass `{ capture: true }` (or `true`) for capturing.\n```js\nparent.addEventListener('click', () => console.log('parent'));\nchild.addEventListener('click', () => console.log('child'));\n// click child → \"child\", then \"parent\"\n```\n`e.stopPropagation()` stops further travel; `e.preventDefault()` only stops the default browser action. Some events don't bubble (`focus`, `blur` — use `focusin/focusout`)."
       },
       {
         "id": "67",
-        "n": 67,
+        "n": 69,
         "q": "What is event delegation? Where would you use it?",
         "a": "Event delegation means attaching **one listener to a common parent** instead of a listener on every child, and using `e.target` to find which child was clicked. It works because events bubble.\n```js\ndocument.getElementById('list').addEventListener('click', e => {\n  const item = e.target.closest('li');\n  if (item) console.log('Clicked', item.dataset.id);\n});\n```\nBenefits: fewer listeners (less memory), works for elements added dynamically later, simpler cleanup.\nUse for: long lists, tables, menus, dynamically generated content. React itself uses delegation — it attaches listeners at the root container."
       },
       {
         "id": "68",
-        "n": 68,
+        "n": 70,
         "q": "What is the difference between map(), filter(), and forEach()?",
         "a": "- **`forEach`**: runs a function for each element; returns `undefined`. Used for side effects. Can't be broken out of (except by throwing).\n- **`map`**: returns a **new array** of the same length with each element transformed.\n- **`filter`**: returns a **new array** with only elements for which the callback returns truthy.\n```js\nconst nums = [1, 2, 3, 4];\nnums.map(n => n * 2);        // [2, 4, 6, 8]\nnums.filter(n => n % 2 === 0); // [2, 4]\nnums.forEach(n => console.log(n)); // undefined\n```\nNone mutate the original array (unless your callback does). `map` and `filter` are chainable."
       },
       {
         "id": "69",
-        "n": 69,
+        "n": 71,
         "q": "What is the difference between shallow copy and deep copy?",
         "a": "- **Shallow copy**: copies the top-level properties only; nested objects/arrays are still **shared references**. Methods: spread `{...obj}`, `[...arr]`, `Object.assign`, `Array.from`, `slice`.\n- **Deep copy**: recursively copies every level, so the copy is fully independent. Methods: `structuredClone(obj)` (modern, handles Dates, Maps, Sets, circular refs; not functions), `JSON.parse(JSON.stringify(obj))` (loses functions, `undefined`, Dates become strings, fails on circular refs), lodash `cloneDeep`.\n```js\nconst a = { user: { name: 'A' } };\nconst s = { ...a };            s.user.name = 'B'; // a.user.name is now 'B'\nconst d = structuredClone(a);  d.user.name = 'C'; // a unchanged\n```\nIn React/Redux, immutable updates are usually shallow copies along the changed path."
       },
       {
         "id": "70",
-        "n": 70,
+        "n": 72,
         "q": "What are Promises?",
         "a": "A Promise is an object representing the eventual result of an async operation. States: **pending** → **fulfilled** (with a value) or **rejected** (with a reason). Once settled it never changes.\n```js\nconst p = new Promise((resolve, reject) => {\n  setTimeout(() => resolve('done'), 1000);\n});\np.then(v => console.log(v))\n .catch(e => console.error(e))\n .finally(() => console.log('cleanup'));\n```\nSolves \"callback hell\": chaining (`then` returns a new promise), centralized error handling with `.catch`. Combinators: `Promise.all`, `allSettled`, `race`, `any`. Callbacks run as microtasks."
       },
       {
         "id": "71",
-        "n": 71,
+        "n": 73,
         "q": "What is the difference between Promise.all() and Promise.allSettled()?",
         "a": "- **`Promise.all(promises)`**: resolves with an array of all values when **all** fulfil; **rejects immediately** when any one rejects (fail-fast). Use when all results are required (e.g. page needs all data).\n- **`Promise.allSettled(promises)`**: waits for **all** to settle and never rejects; returns `[{status: 'fulfilled', value}, {status: 'rejected', reason}]`. Use when calls are independent and you want partial results (e.g. dashboard widgets).\n```js\nconst results = await Promise.allSettled([getUser(), getOrders()]);\nresults.forEach(r => r.status === 'fulfilled' ? use(r.value) : log(r.reason));\n```\nAlso: `Promise.race` (first to settle) and `Promise.any` (first to fulfil; rejects only if all reject)."
       },
       {
         "id": "72",
-        "n": 72,
+        "n": 74,
         "q": "What is the difference between Promises and async/await?",
         "a": "`async/await` is syntax on top of Promises — same mechanism, different style.\n- **Promises**: chain `.then().catch()`; can get nested with complex flows.\n- **async/await**: code reads like synchronous code; errors handled with `try/catch`; easier debugging and conditionals/loops.\n- An `async` function always returns a Promise; `await` pauses that function (not the thread) until the promise settles.\n```js\nasync function load() {\n  try {\n    const user = await getUser();\n    const orders = await getOrders(user.id);\n    return orders;\n  } catch (e) { handle(e); }\n}\n```\nPitfall: sequential `await`s for independent calls are slow — use `await Promise.all([a(), b()])`."
       },
       {
         "id": "73",
-        "n": 73,
+        "n": 75,
         "q": "What is a polyfill? Have you written any?",
         "a": "A polyfill is code that implements a modern feature in environments (old browsers) that don't support it natively, usually by checking if it exists first.\n```js\nif (!Array.prototype.includes) {\n  Array.prototype.includes = function (search, from = 0) {\n    for (let i = from; i < this.length; i++) {\n      if (this[i] === search || (Number.isNaN(this[i]) && Number.isNaN(search))) return true;\n    }\n    return false;\n  };\n}\n```\nInterview favourites: `map`, `filter`, `reduce`, `bind`, `Promise.all`, `debounce`, `flat`. In real projects, polyfills come from **core-js** via Babel (`@babel/preset-env` + browserslist). (A polyfill adds missing APIs; a transpiler converts new syntax.)"
       },
       {
         "id": "74",
-        "n": 74,
+        "n": 76,
         "q": "What is the difference between debounce and throttle?",
         "a": "Both limit how often a function runs during rapid events.\n- **Debounce**: runs the function only **after the events stop** for X ms; each new event resets the timer. Use for search-as-you-type, autosave, window resize end, form validation.\n- **Throttle**: runs the function **at most once every X ms** during continuous events. Use for scroll, mousemove, infinite scroll checks, button spam protection, analytics.\nExample: typing for 2 seconds with 300 ms wait — debounce calls once (at the end); throttle calls about 7 times."
       },
       {
         "id": "75",
-        "n": 75,
+        "n": 77,
         "q": "How would you implement debounce and throttle from scratch?",
         "a": "```js\nfunction debounce(fn, delay) {\n  let timer;\n  return function (...args) {\n    clearTimeout(timer);\n    timer = setTimeout(() => fn.apply(this, args), delay);\n  };\n}\n\nfunction throttle(fn, limit) {\n  let waiting = false;\n  return function (...args) {\n    if (waiting) return;\n    fn.apply(this, args);\n    waiting = true;\n    setTimeout(() => { waiting = false; }, limit);\n  };\n}\n\nconst onSearch = debounce(q => fetchResults(q), 300);\nwindow.addEventListener('scroll', throttle(handleScroll, 200));\n```\nBoth use a **closure** to keep `timer`/`waiting` between calls. Mention extras: leading/trailing options, a `cancel()` method. In React, create them once with `useMemo`/`useRef` (otherwise a new debounced function is created every render) and cancel in cleanup."
       },
       {
         "id": "76",
-        "n": 76,
+        "n": 78,
         "q": "What happens when multiple buttons use the same debounce function?",
         "a": "If **one** debounced instance is shared by multiple buttons, they all share the same `timer` in the closure. Clicking button A then button B quickly cancels A's call — only the last click (B) runs. That's a bug if each button should act independently.\nFix: create a **separate debounced function per button** (or key the timers by id):\n```js\nfunction debounceByKey(fn, delay) {\n  const timers = {};\n  return (key, ...args) => {\n    clearTimeout(timers[key]);\n    timers[key] = setTimeout(() => fn(key, ...args), delay);\n  };\n}\n```\nSharing is fine when you *want* one action overall (e.g. one \"save\" for many inputs)."
       },
       {
         "id": "77",
-        "n": 77,
+        "n": 79,
         "q": "What is the difference between Object.freeze() and Object.seal()?",
         "a": "- **`Object.freeze(obj)`**: can't add, delete or **modify** properties. Fully read-only (at top level).\n- **`Object.seal(obj)`**: can't add or delete properties, but **can modify** existing values.\n- (`Object.preventExtensions`: can't add, but can delete and modify.)\nBoth are **shallow** — nested objects can still change unless you deep-freeze recursively. In strict mode, violations throw a TypeError; otherwise they fail silently. Check with `Object.isFrozen` / `Object.isSealed`.\n```js\nconst f = Object.freeze({ a: 1, n: { b: 2 } });\nf.a = 5;     // ignored\nf.n.b = 9;   // works (shallow)\nconst s = Object.seal({ a: 1 });\ns.a = 2;     // works\ns.c = 3;     // ignored\n```"
       },
       {
         "id": "78",
-        "n": 78,
+        "n": 80,
         "q": "What is the prototype chain in JavaScript?",
         "a": "Every object has an internal link `[[Prototype]]` (accessible via `Object.getPrototypeOf` or `__proto__`) to another object. When you access a property, JS looks on the object first, then up the chain of prototypes until it finds it or reaches `null`.\n```js\nconst arr = [];\n// arr → Array.prototype → Object.prototype → null\narr.push;      // found on Array.prototype\narr.hasOwnProperty; // found on Object.prototype\n```\n- Functions have a `prototype` property; objects created with `new Fn()` link to `Fn.prototype`.\n- `class` syntax is sugar over prototypes (`extends` sets up the chain).\n- `Object.create(proto)` creates an object with a given prototype.\nThis is how JS implements inheritance and shares methods efficiently across instances."
       }
@@ -512,91 +524,91 @@ window.QUESTIONS = [
     "items": [
       {
         "id": "79",
-        "n": 79,
+        "n": 81,
         "q": "How do you optimize the performance of a React application?",
         "a": "Measure first (React DevTools Profiler, Lighthouse, Performance tab), then:\n- **Avoid unnecessary re-renders**: `React.memo`, `useMemo`, `useCallback`, keep state close to where it's used, split contexts.\n- **Code splitting / lazy loading** routes and heavy components (`React.lazy`, dynamic `import()`).\n- **Virtualize** long lists (react-window).\n- **Bundle size**: tree-shaking, remove heavy libs (moment → dayjs), analyze with webpack-bundle-analyzer.\n- **Network**: caching (RTK Query/React Query), debounce search, pagination, compression, CDN, HTTP caching.\n- **Images**: lazy loading, modern formats (WebP/AVIF), correct sizes.\n- Concurrent features: `useTransition`, `useDeferredValue` for heavy updates.\n- SSR/SSG (Next.js) for faster first paint; production build."
       },
       {
         "id": "80",
-        "n": 80,
+        "n": 82,
         "q": "What causes unnecessary re-renders in React?",
         "a": "A component re-renders when: its state changes, its parent re-renders, or a context it uses changes. Common avoidable causes:\n- Parent re-renders and children aren't memoized.\n- New object/array/function props created each render (`style={{...}}`, `onClick={() => ...}`) breaking `React.memo`.\n- State placed too high in the tree (e.g. form input state in App).\n- Large Context values that change often (every consumer re-renders), or a context value object recreated each render.\n- Redux selectors returning new references.\n- Storing derived data in state + effects that set state.\n- Unstable keys (index or random keys) causing remounts."
       },
       {
         "id": "81",
-        "n": 81,
+        "n": 83,
         "q": "How do you identify unnecessary re-renders?",
         "a": "- **React DevTools Profiler**: record an interaction, see which components rendered, how long, and \"Why did this render?\" (enable in settings).\n- DevTools setting **\"Highlight updates when components render\"**.\n- `why-did-you-render` library to log avoidable re-renders.\n- Temporary `console.log` or a render counter (`useRef` incremented each render).\n- Chrome Performance tab for long tasks and scripting time.\nThen fix with memoization, moving state down, or splitting components."
       },
       {
         "id": "82",
-        "n": 82,
+        "n": 84,
         "q": "What is memoization?",
         "a": "Memoization is caching the result of a function call based on its inputs, so repeated calls with the same inputs return the cached result instead of recomputing.\n```js\nfunction memoize(fn) {\n  const cache = new Map();\n  return arg => {\n    if (cache.has(arg)) return cache.get(arg);\n    const result = fn(arg);\n    cache.set(arg, result);\n    return result;\n  };\n}\n```\nIn React: `React.memo` (components), `useMemo` (values), `useCallback` (functions), Reselect's `createSelector` (selectors). Trade-off: uses memory and comparison costs, so apply it where it measurably helps."
       },
       {
         "id": "83",
-        "n": 83,
+        "n": 85,
         "q": "How do you use React.memo() to optimize a component?",
         "a": "Wrap the component; React skips re-rendering it when its props are shallowly equal to the previous props.\n```jsx\nconst UserCard = React.memo(function UserCard({ user, onSelect }) {\n  return <div onClick={() => onSelect(user.id)}>{user.name}</div>;\n});\n\n// Parent: keep props stable\nconst handleSelect = useCallback(id => setSelected(id), []);\n<UserCard user={user} onSelect={handleSelect} />\n```\n- Optional second arg: custom comparison `(prev, next) => boolean` (return true to skip render).\n- It still re-renders if its own state or a used context changes.\n- Best for components that render often with the same props and are expensive (list rows, charts)."
       },
       {
         "id": "84",
-        "n": 84,
+        "n": 86,
         "q": "What is code splitting?",
         "a": "Code splitting breaks the app bundle into smaller chunks that are loaded **on demand** instead of shipping one huge JS file upfront. This reduces initial load time and Time to Interactive.\n- Done with dynamic `import()`; bundlers (Webpack, Vite) create separate chunks automatically.\n- In React: `React.lazy` + `Suspense` for components; split by **route** first (biggest win), then heavy components (charts, editors, modals).\n- Also `splitChunks` to separate vendor code for better caching.\n```js\nimport('./utils/heavy').then(mod => mod.run());\n```"
       },
       {
         "id": "85",
-        "n": 85,
+        "n": 87,
         "q": "What is lazy loading in React?",
         "a": "Lazy loading means loading a resource only when it's needed rather than on initial page load.\nIn React:\n- **Components/routes**: `React.lazy(() => import('./Dashboard'))` wrapped in `<Suspense fallback={...}>`.\n- **Images**: `<img loading=\"lazy\">` or IntersectionObserver.\n- **Data**: fetch when a section scrolls into view or a tab opens.\nBenefit: smaller initial bundle, faster first load. Cost: a small delay when the user first opens that part, so show a good fallback and consider prefetching likely routes."
       },
       {
         "id": "86",
-        "n": 86,
+        "n": 88,
         "q": "How does React.lazy() work?",
         "a": "`React.lazy` takes a function returning a dynamic `import()` promise that resolves to a module with a **default export** component.\n```jsx\nconst Reports = React.lazy(() => import('./pages/Reports'));\n\n<Suspense fallback={<Spinner />}>\n  <Routes>\n    <Route path=\"/reports\" element={<Reports />} />\n  </Routes>\n</Suspense>\n```\nHow it works: on first render, the lazy component **throws the promise**; the nearest `Suspense` catches it and shows the fallback. When the chunk loads, React re-renders with the real component (cached afterwards). Wrap with an Error Boundary to handle chunk load failures. For named exports: `import('./X').then(m => ({ default: m.Named }))`."
       },
       {
         "id": "87",
-        "n": 87,
+        "n": 89,
         "q": "What is the purpose of Suspense?",
         "a": "`Suspense` lets you show a **fallback UI** (spinner, skeleton) while its children are \"not ready yet\" — waiting for lazy-loaded code or, with Suspense-enabled data libraries/frameworks (Next.js, React Query suspense mode, React 19 `use()`), data.\n```jsx\n<Suspense fallback={<Skeleton />}>\n  <Comments />\n</Suspense>\n```\n- Boundaries can be nested to reveal parts of the page progressively.\n- In SSR (Next.js App Router), Suspense enables **streaming** HTML chunks.\n- Combine with `useTransition` to keep showing old content instead of a fallback during updates."
       },
       {
         "id": "88",
-        "n": 88,
+        "n": 90,
         "q": "How do you handle a large list of records coming from an API?",
         "a": "- **Server-side pagination** or **infinite scroll** — don't fetch 10,000 rows at once if avoidable.\n- **Virtualization** (react-window / react-virtuoso / TanStack Virtual): render only visible rows.\n- Memoize rows (`React.memo`) with stable keys and stable callbacks.\n- Debounce search/filter; move heavy filtering/sorting to the server or a Web Worker; use `useDeferredValue`/`useTransition` for client-side filtering.\n- Cache responses (RTK Query/React Query); normalize data.\n- Show skeleton loaders; request only the fields needed."
       },
       {
         "id": "89",
-        "n": 89,
+        "n": 91,
         "q": "What is list virtualization? Have you used react-window or a similar library?",
         "a": "List virtualization (windowing) renders only the items currently visible in the viewport (plus a small buffer), instead of thousands of DOM nodes. As you scroll, rows are recycled and positioned absolutely inside a tall container to keep the scrollbar correct.\n```jsx\nimport { FixedSizeList as List } from 'react-window';\n<List height={500} itemCount={items.length} itemSize={40} width=\"100%\">\n  {({ index, style }) => <div style={style}>{items[index].name}</div>}\n</List>\n```\nBenefits: fast initial render, low memory, smooth scrolling. Libraries: react-window, react-virtualized, react-virtuoso (variable heights), TanStack Virtual. Caveats: Ctrl+F browser search doesn't find off-screen items; variable heights need measurement; accessibility needs care."
       },
       {
         "id": "90",
-        "n": 90,
+        "n": 92,
         "q": "How would you implement pagination or infinite scrolling?",
         "a": "**Pagination**: keep `page` (and `pageSize`) in state or URL; fetch `/api/items?page=2&limit=20`; show next/prev buttons using `total`/`totalPages` from the API.\n**Infinite scroll**: append the next page when a sentinel element at the bottom becomes visible:\n```jsx\nconst loaderRef = useRef(null);\nuseEffect(() => {\n  const obs = new IntersectionObserver(([entry]) => {\n    if (entry.isIntersecting && hasMore && !loading) setPage(p => p + 1);\n  });\n  if (loaderRef.current) obs.observe(loaderRef.current);\n  return () => obs.disconnect();\n}, [hasMore, loading]);\n// useEffect on [page] → fetch and setItems(prev => [...prev, ...newItems])\n```\nPrefer **cursor-based** pagination for changing data. Combine infinite scroll with virtualization for huge lists; RTK Query/React Query (`useInfiniteQuery`) simplify this."
       },
       {
         "id": "91",
-        "n": 91,
+        "n": 93,
         "q": "How would you optimize an application with multiple API calls?",
         "a": "- Run independent calls **in parallel** with `Promise.all` / `allSettled`, not one by one.\n- **Cache** and de-duplicate requests (RTK Query, React Query, SWR) so multiple components share one request.\n- Combine endpoints on the backend (BFF / GraphQL) to reduce round trips.\n- Lazy-load data for parts not visible yet (tabs, below-the-fold).\n- Debounce/throttle user-triggered calls; cancel outdated ones with AbortController.\n- Prefetch likely next data; show progressive UI (skeletons per section with Suspense).\n- HTTP caching headers, compression, CDN."
       },
       {
         "id": "92",
-        "n": 92,
+        "n": 94,
         "q": "How do you prevent unnecessary API calls when a component re-renders?",
         "a": "- Use correct `useEffect` dependencies; avoid objects/functions created during render as dependencies (memoize or use primitives).\n- Never call APIs directly in the component body — only in effects or event handlers.\n- Use a caching library (RTK Query/React Query) that de-duplicates and caches by key.\n- Lift the fetch to a parent or store so remounting children don't refetch.\n- Debounce input-driven requests; use a ref flag to prevent duplicate submits.\n- Remember StrictMode intentionally runs effects twice in development only."
       },
       {
         "id": "93",
-        "n": 93,
+        "n": 95,
         "q": "How would you improve the initial loading performance of a React application?",
         "a": "- **Code splitting** by route and lazy-load heavy components.\n- Reduce bundle size: tree-shaking, remove unused/heavy libraries, analyze bundle.\n- **SSR/SSG** (Next.js) or prerendering for faster First Contentful Paint and SEO.\n- Optimize assets: compressed (gzip/brotli), minified, CDN, long-term caching with hashed filenames.\n- Images: lazy loading, responsive sizes, WebP/AVIF; fonts: `font-display: swap`, preload critical ones.\n- `preload`/`prefetch`/`preconnect` for critical resources; defer non-critical scripts (analytics).\n- Skeleton screens to improve perceived performance.\n- Measure with Lighthouse / Web Vitals (LCP, INP, CLS)."
       }
@@ -607,7 +619,7 @@ window.QUESTIONS = [
     "items": [
       {
         "id": "95",
-        "n": 95,
+        "n": 96,
         "q": "Write a program to find the frequency of each character in a string.",
         "code": "const str = \"aabcabcb\";\n\n// Expected output:\n// { a: 3, b: 3, c: 2 }",
         "group": "JavaScript coding",
@@ -615,7 +627,7 @@ window.QUESTIONS = [
       },
       {
         "id": "96",
-        "n": 96,
+        "n": 97,
         "q": "Find the frequency of elements in an array.",
         "code": "const arr = [1, 2, 1, 2, 3, 3, 2, 1];\n\n// Expected output:\n// { 1: 3, 2: 3, 3: 2 }",
         "group": "JavaScript coding",
@@ -623,14 +635,14 @@ window.QUESTIONS = [
       },
       {
         "id": "97",
-        "n": 97,
+        "n": 98,
         "q": "Find the sum of all elements in an array.",
         "group": "JavaScript coding",
         "a": "```js\nconst sum = arr => arr.reduce((acc, n) => acc + n, 0);\nsum([1, 2, 3, 4]); // 10\n\n// classic loop\nfunction sumLoop(arr) {\n  let total = 0;\n  for (let i = 0; i < arr.length; i++) total += arr[i];\n  return total;\n}\n```\nAlways pass the initial value `0` to `reduce` — otherwise an empty array throws a TypeError."
       },
       {
         "id": "98",
-        "n": 98,
+        "n": 99,
         "q": "Merge two arrays and remove duplicate elements.",
         "code": "const arr1 = [1, 2, 3, 7, 8];\nconst arr2 = [1, 4, 5, 9, 10];\n\n// Expected output:\n// [1, 2, 3, 4, 5, 7, 8, 9, 10]",
         "group": "JavaScript coding",
@@ -638,7 +650,7 @@ window.QUESTIONS = [
       },
       {
         "id": "99",
-        "n": 99,
+        "n": 100,
         "q": "Convert two arrays into an object.",
         "code": "const keys = [\"name\", \"age\", \"country\"];\nconst values = [\"Bobby\", 30, \"India\"];\n\n// Expected output:\n// { name: \"Bobby\", age: 30, country: \"India\" }",
         "group": "JavaScript coding",
@@ -646,28 +658,28 @@ window.QUESTIONS = [
       },
       {
         "id": "100",
-        "n": 100,
+        "n": 101,
         "q": "Write a function to find the first non-repeating character in a string.",
         "group": "JavaScript coding",
         "a": "```js\nfunction firstNonRepeating(str) {\n  const count = {};\n  for (const ch of str) count[ch] = (count[ch] || 0) + 1;\n  for (const ch of str) if (count[ch] === 1) return ch;\n  return null;\n}\nfirstNonRepeating(\"aabbcdc\"); // \"d\"\n```\nTwo passes, O(n) time. Alternative: `str.indexOf(ch) === str.lastIndexOf(ch)` — simpler but O(n²)."
       },
       {
         "id": "101",
-        "n": 101,
+        "n": 102,
         "q": "Implement debounce from scratch.",
         "group": "JavaScript coding",
         "a": "```js\nfunction debounce(fn, delay = 300) {\n  let timer;\n  function debounced(...args) {\n    clearTimeout(timer);\n    timer = setTimeout(() => fn.apply(this, args), delay);\n  }\n  debounced.cancel = () => clearTimeout(timer);\n  return debounced;\n}\n\nconst input = document.querySelector('#search');\ninput.addEventListener('input', debounce(e => search(e.target.value), 400));\n```\nExplain: closure keeps `timer`; each call resets it; `fn` runs only after `delay` ms of silence; `apply(this, args)` preserves context and arguments."
       },
       {
         "id": "102",
-        "n": 102,
+        "n": 103,
         "q": "Implement throttle from scratch.",
         "group": "JavaScript coding",
         "a": "```js\nfunction throttle(fn, limit = 300) {\n  let last = 0;\n  return function (...args) {\n    const now = Date.now();\n    if (now - last >= limit) {\n      last = now;\n      fn.apply(this, args);\n    }\n  };\n}\n\nwindow.addEventListener('scroll', throttle(() => console.log(window.scrollY), 200));\n```\nThis is the \"leading edge\" version. A timer-based version can also guarantee a final trailing call after the events stop."
       },
       {
         "id": "103",
-        "n": 103,
+        "n": 104,
         "q": "Sort an array of alphanumeric strings naturally.",
         "code": "const arr = [\"A1\", \"A10\", \"A11\", \"A2\", \"A3\"];\n\n// Expected:\n// [\"A1\", \"A2\", \"A3\", \"A10\", \"A11\"]",
         "group": "JavaScript coding",
@@ -675,52 +687,66 @@ window.QUESTIONS = [
       },
       {
         "id": "104",
-        "n": 104,
+        "n": 105,
         "q": "Find the second-largest number in an array.",
         "group": "JavaScript coding",
         "a": "```js\nfunction secondLargest(arr) {\n  let first = -Infinity, second = -Infinity;\n  for (const n of arr) {\n    if (n > first) { second = first; first = n; }\n    else if (n > second && n !== first) second = n;\n  }\n  return second === -Infinity ? null : second;\n}\nsecondLargest([10, 5, 20, 20, 8]); // 10\n```\nSingle pass, O(n), handles duplicates. Shortcut: `[...new Set(arr)].sort((a, b) => b - a)[1]` — O(n log n)."
       },
       {
         "id": "105",
-        "n": 105,
+        "n": 106,
         "q": "Flatten a nested array.",
         "group": "JavaScript coding",
         "a": "```js\nconst nested = [1, [2, [3, [4]], 5]];\n\nnested.flat(Infinity); // [1, 2, 3, 4, 5]\n\n// recursive\nfunction flatten(arr) {\n  return arr.reduce((acc, item) =>\n    Array.isArray(item) ? acc.concat(flatten(item)) : acc.concat(item), []);\n}\n\n// with depth (polyfill-like)\nfunction flat(arr, depth = 1) {\n  return depth > 0\n    ? arr.reduce((acc, x) => acc.concat(Array.isArray(x) ? flat(x, depth - 1) : x), [])\n    : arr.slice();\n}\n```\nIterative alternative uses a stack to avoid recursion limits for very deep arrays."
       },
       {
         "id": "106",
-        "n": 106,
+        "n": 107,
         "q": "Reverse a string without using the built-in reverse method.",
         "group": "JavaScript coding",
         "a": "```js\nfunction reverseString(str) {\n  let result = '';\n  for (let i = str.length - 1; i >= 0; i--) result += str[i];\n  return result;\n}\nreverseString(\"hello\"); // \"olleh\"\n\n// two-pointer swap on an array\nfunction reverse2(str) {\n  const a = [...str];          // spread handles emoji/unicode better than split('')\n  for (let i = 0, j = a.length - 1; i < j; i++, j--) [a[i], a[j]] = [a[j], a[i]];\n  return a.join('');\n}\n```"
       },
       {
         "id": "107",
-        "n": 107,
+        "n": 108,
         "q": "Find duplicate elements in an array.",
         "group": "JavaScript coding",
         "a": "```js\nfunction findDuplicates(arr) {\n  const seen = new Set();\n  const dupes = new Set();\n  for (const x of arr) {\n    if (seen.has(x)) dupes.add(x);\n    else seen.add(x);\n  }\n  return [...dupes];\n}\nfindDuplicates([1, 2, 3, 2, 4, 1, 1]); // [2, 1]\n\n// short version (O(n²))\narr.filter((x, i) => arr.indexOf(x) !== i);  // may repeat values\n```"
       },
       {
         "id": "108",
-        "n": 108,
+        "n": 109,
         "q": "Implement a custom map() function.",
         "group": "JavaScript coding",
         "a": "```js\nArray.prototype.myMap = function (callback, thisArg) {\n  if (typeof callback !== 'function') throw new TypeError(callback + ' is not a function');\n  const result = new Array(this.length);\n  for (let i = 0; i < this.length; i++) {\n    if (i in this) result[i] = callback.call(thisArg, this[i], i, this); // skip holes\n  }\n  return result;\n};\n[1, 2, 3].myMap(x => x * 2); // [2, 4, 6]\n```\nPoints to mention: callback gets `(element, index, array)`, supports `thisArg`, returns a new array, doesn't mutate the original. Use a normal `function` so `this` is the array."
       },
       {
         "id": "109",
-        "n": 109,
+        "n": 110,
         "q": "Implement a custom filter() function.",
         "group": "JavaScript coding",
         "a": "```js\nArray.prototype.myFilter = function (callback, thisArg) {\n  if (typeof callback !== 'function') throw new TypeError(callback + ' is not a function');\n  const result = [];\n  for (let i = 0; i < this.length; i++) {\n    if (i in this && callback.call(thisArg, this[i], i, this)) result.push(this[i]);\n  }\n  return result;\n};\n[1, 2, 3, 4].myFilter(n => n % 2 === 0); // [2, 4]\n```"
       },
       {
         "id": "110",
-        "n": 110,
+        "n": 111,
         "q": "Write a polyfill for Array.prototype.reduce().",
         "group": "JavaScript coding",
         "a": "```js\nArray.prototype.myReduce = function (callback, initialValue) {\n  if (typeof callback !== 'function') throw new TypeError(callback + ' is not a function');\n  const arr = this;\n  let i = 0;\n  let acc;\n  if (arguments.length >= 2) {\n    acc = initialValue;\n  } else {\n    while (i < arr.length && !(i in arr)) i++;          // skip holes\n    if (i >= arr.length) throw new TypeError('Reduce of empty array with no initial value');\n    acc = arr[i++];\n  }\n  for (; i < arr.length; i++) {\n    if (i in arr) acc = callback(acc, arr[i], i, arr);\n  }\n  return acc;\n};\n[1, 2, 3].myReduce((a, b) => a + b, 0); // 6\n```\nKey details: use `arguments.length` (so `initialValue` of `undefined` still counts), throw on empty array without initial value, callback gets `(acc, cur, index, array)`."
+      },
+      {
+        "id": "cb3",
+        "n": 112,
+        "q": "Write polyfills for call() and apply().",
+        "group": "JavaScript coding",
+        "a": "Idea: temporarily attach the function to the target object as a method and call it. A method call sets `this` to that object. Then remove it.\n```js\nFunction.prototype.myCall = function (context, ...args) {\n  if (typeof this !== 'function') throw new TypeError('myCall must be called on a function');\n  // null/undefined -> global object; primitives -> wrapper objects (like non-strict call)\n  context = context == null ? globalThis : Object(context);\n  const key = Symbol('fn');   // unique key, can't clash with existing properties\n  context[key] = this;\n  try {\n    return context[key](...args);\n  } finally {\n    delete context[key];      // clean up even if the function throws\n  }\n};\n\nFunction.prototype.myApply = function (context, args) {\n  return this.myCall(context, ...(args ?? []));\n};\n\nfunction greet(greeting) { return `${greeting}, ${this.name}`; }\ngreet.myCall({ name: 'Sam' }, 'Hi');     // \"Hi, Sam\"\ngreet.myApply({ name: 'Sam' }, ['Hey']); // \"Hey, Sam\"\n```\nWhat interviewers look for: a **Symbol** key, cleanup in `finally`, handling `null`/`undefined` and primitive `context`, and returning the result. Limitation: it can't work on frozen or sealed objects, because it has to add a property."
+      },
+      {
+        "id": "cb4",
+        "n": 113,
+        "q": "Write a polyfill for bind().",
+        "group": "JavaScript coding",
+        "a": "`bind` returns a new function that calls the original with a fixed `this`, the preset arguments, and any arguments passed later:\n```js\nFunction.prototype.myBind = function (context, ...preset) {\n  if (typeof this !== 'function') throw new TypeError('myBind must be called on a function');\n  const fn = this;\n  return function bound(...later) {\n    // With `new`, ignore the bound this, like native bind does.\n    if (new.target) return new fn(...preset, ...later);\n    return fn.apply(context, [...preset, ...later]);\n  };\n};\n\nconst user = { name: 'Sam' };\nfunction greet(greeting, punct) { return `${greeting}, ${this.name}${punct}`; }\nconst hi = greet.myBind(user, 'Hi');\nhi('!');                     // \"Hi, Sam!\"\nhi.call({ name: 'X' }, '?'); // \"Hi, Sam?\" – this stays bound\n```\nPoints to mention:\n- **Partial application**: preset arguments come first, later ones are appended.\n- The returned function is a **closure** over `fn`, `context` and `preset`.\n- **`new` support** is the usual follow-up: a bound function used as a constructor ignores the bound `this`.\n- If asked not to use `apply`, call the original through the `myCall` polyfill instead."
       },
       {
         "id": "m1",
@@ -777,91 +803,91 @@ window.QUESTIONS = [
     "items": [
       {
         "id": "111",
-        "n": 111,
+        "n": 114,
         "q": "How do you make an API call in React?",
         "a": "Usually inside `useEffect` (for data on load) or an event handler (for user actions), with `fetch` or `axios`. Track loading/error, and cancel on unmount.\n```jsx\nuseEffect(() => {\n  const controller = new AbortController();\n  (async () => {\n    try {\n      setLoading(true);\n      const { data } = await axios.get(`/api/users/${id}`, { signal: controller.signal });\n      setUser(data);\n    } catch (e) {\n      if (!axios.isCancel(e)) setError(e);\n    } finally {\n      setLoading(false);\n    }\n  })();\n  return () => controller.abort();\n}, [id]);\n```\nIn real projects: a central API service (axios instance with base URL and interceptors) plus RTK Query / React Query for caching. (The effect callback itself can't be `async`, so define an async function inside.)"
       },
       {
         "id": "112",
-        "n": 112,
+        "n": 115,
         "q": "What is the difference between Fetch API and Axios?",
         "a": "- **Fetch**: built into browsers, no dependency. Returns a `Response`; you must call `res.json()`. **Does not reject on HTTP errors** (404/500) — check `res.ok`. No built-in interceptors or timeout (use AbortController).\n- **Axios**: third-party library. Automatically parses JSON and stringifies request bodies; **rejects on non-2xx**; **interceptors** for adding auth tokens / handling 401 globally; timeouts; upload/download progress; instances with base config; works in Node too.\n```js\nconst res = await fetch('/api/users');\nif (!res.ok) throw new Error(res.status);\nconst users = await res.json();\n\nconst { data: users2 } = await axios.get('/api/users');\n```"
       },
       {
         "id": "113",
-        "n": 113,
+        "n": 116,
         "q": "How do you handle loading and error states?",
         "a": "Keep explicit states — `loading`, `error`, `data` (or a `status`: `'idle' | 'loading' | 'success' | 'error'`) — and render each case:\n```jsx\nif (status === 'loading') return <Skeleton />;\nif (status === 'error') return <ErrorMessage message={error} onRetry={refetch} />;\nif (!data.length) return <EmptyState />;\nreturn <List items={data} />;\n```\nGood practices: reset error before retrying, show a retry button, user-friendly messages (log technical details), skeletons instead of spinners for layout stability, disable buttons while submitting, global toast for mutation errors, Error Boundaries for render errors. RTK Query/React Query give `isLoading`, `isError`, `error` out of the box."
       },
       {
         "id": "114",
-        "n": 114,
+        "n": 117,
         "q": "Suppose you have three APIs, and API 2 depends on the successful response of API 1. How would you implement this?",
         "a": "Run them **sequentially** where there's a dependency, using `async/await` (and parallelize anything independent):\n```js\nasync function loadDashboard() {\n  try {\n    setLoading(true);\n    const user = await api.getUser();                 // API 1\n    const orders = await api.getOrders(user.id);      // API 2 needs API 1's result\n    const recommendations = await api.getRecs(orders[0]?.id); // API 3\n    setData({ user, orders, recommendations });\n  } catch (err) {\n    setError(err);            // any failure stops the chain\n  } finally {\n    setLoading(false);\n  }\n}\n```\nIf API 3 only depends on API 1, run 2 and 3 together: `await Promise.all([getOrders(user.id), getRecs(user.id)])`.\nWith RTK Query/React Query: use the `skip` / `enabled` option — `useGetOrdersQuery(user?.id, { skip: !user })`. Also cancel with AbortController if the component unmounts."
       },
       {
         "id": "115",
-        "n": 115,
+        "n": 118,
         "q": "How would you call multiple APIs simultaneously?",
         "a": "Use `Promise.all` (all required) or `Promise.allSettled` (independent, want partial results):\n```js\nconst [users, products, stats] = await Promise.all([\n  api.get('/users'),\n  api.get('/products'),\n  api.get('/stats'),\n]);\n```\nTotal time ≈ the slowest request instead of the sum. With hooks libraries, simply call several query hooks in the component — they run in parallel. Limit concurrency if there are many requests (e.g. batches of 5)."
       },
       {
         "id": "116",
-        "n": 116,
+        "n": 119,
         "q": "How do you handle API failures when multiple requests are running?",
         "a": "- Use **`Promise.allSettled`** so one failure doesn't throw away successful results; render each section with its own error state.\n- With `Promise.all`, wrap each call with its own `.catch` to return a fallback:\n```js\nconst safe = p => p.then(data => ({ data })).catch(error => ({ error }));\nconst [users, stats] = await Promise.all([safe(getUsers()), safe(getStats())]);\n```\n- **Retry** with exponential backoff for transient errors (network, 503), not for 4xx.\n- If one failure makes the rest useless, use `Promise.all` and **abort** the other requests.\n- Show partial UI + \"retry\" per widget; log errors centrally (Sentry); wrap widgets in Error Boundaries."
       },
       {
         "id": "117",
-        "n": 117,
+        "n": 120,
         "q": "How do you prevent duplicate API calls?",
         "a": "- **Disable the button** / ignore clicks while a request is in flight (`if (loadingRef.current) return;`).\n- **Debounce** input-driven calls (search).\n- **De-duplicate** with a caching layer: RTK Query/React Query share one in-flight request per key.\n- Keep an in-flight map of pending promises keyed by URL and return the existing promise.\n- **Cancel** the previous request with AbortController when a new one starts (`takeLatest` behaviour).\n- Correct `useEffect` dependencies; fetch higher in the tree instead of in every child.\n- Backend: idempotency keys for critical POSTs (payments)."
       },
       {
         "id": "118",
-        "n": 118,
+        "n": 121,
         "q": "How do you cancel an API request when a component unmounts?",
         "a": "Use `AbortController` and abort in the effect cleanup:\n```jsx\nuseEffect(() => {\n  const controller = new AbortController();\n  fetch(url, { signal: controller.signal })\n    .then(r => r.json())\n    .then(setData)\n    .catch(err => { if (err.name !== 'AbortError') setError(err); });\n  return () => controller.abort();      // runs on unmount or when url changes\n}, [url]);\n```\nAxios supports the same `signal` option (older: `CancelToken`). RTK Query/React Query handle this automatically. This prevents setting state on unmounted components and avoids race conditions."
       },
       {
         "id": "119",
-        "n": 119,
+        "n": 122,
         "q": "How do you handle token expiration in a React application?",
         "a": "Common approach: **short-lived access token + long-lived refresh token** (refresh token in an httpOnly secure cookie).\n- An **axios response interceptor** catches `401`, calls `/refresh`, stores the new access token, and **retries the original request**.\n- Queue concurrent requests while one refresh is in progress so you refresh only once.\n- If refresh fails → clear state and redirect to login.\n- Optionally refresh proactively before expiry (decode `exp` from the JWT).\n```js\nlet refreshing = null;\napi.interceptors.response.use(r => r, async error => {\n  const original = error.config;\n  if (error.response?.status === 401 && !original._retry) {\n    original._retry = true;\n    refreshing = refreshing || api.post('/auth/refresh').finally(() => { refreshing = null; });\n    const { data } = await refreshing;\n    setAccessToken(data.accessToken);\n    original.headers.Authorization = `Bearer ${data.accessToken}`;\n    return api(original);\n  }\n  return Promise.reject(error);\n});\n```"
       },
       {
         "id": "120",
-        "n": 120,
+        "n": 123,
         "q": "How do you implement authentication and authorization?",
         "a": "- **Authentication** (who you are): user logs in → backend returns a token (JWT) or sets a session cookie. Store tokens securely (httpOnly cookie preferred; memory over localStorage due to XSS). Keep the user in an `AuthContext`/Redux; attach token in an axios request interceptor; handle refresh/expiry and logout. Or use OAuth/OIDC providers (Azure AD, Auth0, Cognito).\n- **Authorization** (what you can do): the backend returns roles/permissions; the frontend uses them to protect routes, hide/disable UI (`<Can permission=\"edit\">`), and show menus.\nImportant: frontend checks are only for UX — the **backend must always enforce** authorization on every API."
       },
       {
         "id": "121",
-        "n": 121,
+        "n": 124,
         "q": "How would you implement protected routes?",
         "a": "Wrap routes in a component that checks auth and redirects (React Router v6):\n```jsx\nfunction ProtectedRoute({ allowedRoles }) {\n  const { user, loading } = useAuth();\n  const location = useLocation();\n  if (loading) return <Spinner />;\n  if (!user) return <Navigate to=\"/login\" replace state={{ from: location }} />;\n  if (allowedRoles && !allowedRoles.includes(user.role)) return <Navigate to=\"/unauthorized\" replace />;\n  return <Outlet />;\n}\n\n<Routes>\n  <Route path=\"/login\" element={<Login />} />\n  <Route element={<ProtectedRoute />}>\n    <Route path=\"/dashboard\" element={<Dashboard />} />\n  </Route>\n  <Route element={<ProtectedRoute allowedRoles={['admin']} />}>\n    <Route path=\"/admin\" element={<Admin />} />\n  </Route>\n</Routes>\n```\nAfter login, redirect back to `location.state.from`. In Next.js, use middleware for route protection."
       },
       {
         "id": "122",
-        "n": 122,
+        "n": 125,
         "q": "How do you handle pagination when the backend returns thousands of records?",
         "a": "- Ask the backend for **server-side pagination** (`?page=&limit=` or cursor-based `?after=`), returning items + total/next cursor. Don't load thousands of records at once.\n- Keep page/filter/sort in the URL so links and refresh work.\n- Cache visited pages (RTK Query/React Query), prefetch the next page, keep previous data while loading (`keepPreviousData`).\n- Server-side filtering/sorting so pagination stays correct.\n- If you must load everything: virtualization + client-side pagination, maybe in a Web Worker.\n- Cursor pagination avoids duplicates/missing rows when data changes between pages."
       },
       {
         "id": "123",
-        "n": 123,
+        "n": 126,
         "q": "What happens if the user clicks the Submit button multiple times before the API responds?",
         "a": "Each click can send a new request → duplicate orders/records, race conditions, inconsistent UI.\nPrevent it:\n- Disable the button and show a spinner while submitting (`isSubmitting`).\n- Guard with a ref (state updates are async, so a fast double click can slip through):\n```jsx\nconst submittingRef = useRef(false);\nasync function handleSubmit() {\n  if (submittingRef.current) return;\n  submittingRef.current = true;\n  setSubmitting(true);\n  try { await api.createOrder(form); }\n  finally { submittingRef.current = false; setSubmitting(false); }\n}\n```\n- Debounce/throttle the handler.\n- Backend: **idempotency key** so duplicate requests are processed once."
       },
       {
         "id": "124",
-        "n": 124,
+        "n": 127,
         "q": "How would you handle a slow API response in production?",
         "a": "- First **measure** where it's slow (network tab, APM, backend logs) and work with the backend: indexes, caching, pagination, smaller payloads.\n- Frontend UX: skeletons, progressive loading, optimistic updates, show cached/stale data while revalidating.\n- Set **timeouts** with clear messages and a retry option; retry with backoff for transient errors.\n- Cache responses; prefetch; avoid blocking the whole page — load sections independently with Suspense boundaries.\n- Cancel outdated requests; move long jobs to async processing with polling/websockets.\n- Monitor with RUM/Sentry/New Relic and alert on latency."
       },
       {
         "id": "125",
-        "n": 125,
+        "n": 128,
         "q": "How do you handle race conditions when multiple API calls update the same component?",
         "a": "A race condition happens when an older, slower response arrives after a newer one and overwrites it (e.g. typing \"re\" then \"react\" — \"re\" results show last).\nFixes:\n- **Abort** the previous request on change (AbortController in effect cleanup).\n- **Ignore stale responses** with a flag or request id:\n```jsx\nuseEffect(() => {\n  let ignore = false;\n  search(query).then(res => { if (!ignore) setResults(res); });\n  return () => { ignore = true; };\n}, [query]);\n```\n- Libraries: RTK Query/React Query (keyed by query), redux-saga `takeLatest`, RxJS `switchMap`.\n- For mutations, use optimistic updates with rollback and server versions/timestamps."
       }
@@ -872,91 +898,91 @@ window.QUESTIONS = [
     "items": [
       {
         "id": "126",
-        "n": 126,
+        "n": 129,
         "q": "What is Microfrontend architecture?",
         "a": "Micro-frontend architecture splits a large frontend into smaller, **independently developed and deployed** apps, each owned by a team (e.g. Catalog, Cart, Account), composed into one product by a **shell/host** app.\nImplementation options:\n- **Webpack 5 Module Federation** (most common) — load remote modules at runtime.\n- single-spa, iframes, Web Components, or build-time integration via npm packages.\nBenefits: independent deploys, team autonomy, smaller codebases, incremental migration (e.g. Angular → React). Costs: complexity, duplicated dependencies, consistent UX/design system, shared state and routing, performance overhead."
       },
       {
         "id": "127",
-        "n": 127,
+        "n": 130,
         "q": "When would you choose Microfrontends over a monolithic frontend?",
         "a": "Choose micro-frontends when:\n- **Multiple teams** work on a large product and need independent release cycles.\n- Domains are clearly separable (checkout, search, profile).\n- You need **incremental migration** of a legacy app or mixed frameworks.\n- Different parts scale or change at very different rates.\nStay with a (well-modularized) monolith when the team is small, the app is medium-sized, or features are tightly coupled — micro-frontends add infra, versioning and performance overhead that's not worth it there."
       },
       {
         "id": "128",
-        "n": 128,
+        "n": 131,
         "q": "How do you share common components and libraries between Microfrontends?",
         "a": "- **Shared design system / component library** published as a versioned npm package (often in a monorepo with Nx/Turborepo + Storybook).\n- **Module Federation `shared`** config to share singletons like `react`, `react-dom`, `react-router` (same version, `singleton: true`) so they're loaded once.\n- Expose common components/utilities from a remote (\"shared\" app) and consume at runtime.\n- Shared design tokens/CSS variables for consistent styling.\n- Communication via props from the shell, custom events, or a small shared event bus — avoid tightly coupled global stores.\n- Semantic versioning and contracts to avoid breaking other teams."
       },
       {
         "id": "129",
-        "n": 129,
+        "n": 132,
         "q": "What is the difference between CSR, SSR, and SSG?",
         "a": "- **CSR (Client-Side Rendering)**: server sends a mostly empty HTML + JS bundle; browser builds the UI. Slower first paint, weaker SEO, but rich interactivity and cheap hosting (Create React App / Vite SPA).\n- **SSR (Server-Side Rendering)**: HTML is generated **on each request** on the server, then hydrated in the browser. Fast first paint, good SEO, always fresh data; higher server cost and TTFB.\n- **SSG (Static Site Generation)**: HTML generated **at build time** and served from a CDN. Fastest, cheapest; data can go stale — use **ISR** (Incremental Static Regeneration) to re-generate periodically.\nNext.js lets you mix these per page/route."
       },
       {
         "id": "130",
-        "n": 130,
+        "n": 133,
         "q": "What is hydration in React/Next.js?",
         "a": "Hydration is the process where React, on the client, takes the HTML rendered on the server and **attaches event listeners and state** to it, making it interactive — instead of rebuilding the DOM from scratch. (`hydrateRoot` in React 18.)\n- The client render must produce the **same markup** as the server, otherwise you get hydration mismatch warnings (common causes: `Date.now()`, `Math.random()`, `window` checks, locale formatting during render). Move browser-only logic into `useEffect`.\n- React 18 supports **selective/streaming hydration** with Suspense; Next.js App Router uses **Server Components** that don't need hydration at all, reducing JS shipped."
       },
       {
         "id": "131",
-        "n": 131,
+        "n": 134,
         "q": "How would you design a scalable React application?",
         "a": "- **Feature-based folder structure** with clear boundaries.\n- Reusable **design system** components; consistent styling approach.\n- Clear **state strategy**: server state (RTK Query/React Query), global client state (Redux/Zustand), local state, URL state.\n- Central **API layer** (axios instance, interceptors, typed services).\n- **TypeScript**, ESLint, Prettier, Husky pre-commit hooks.\n- **Routing** with lazy-loaded routes; code splitting.\n- **Testing**: Jest + React Testing Library, Cypress/Playwright E2E.\n- Error handling (Error Boundaries, logging), performance budgets, accessibility.\n- CI/CD, environment configs, feature flags, monitoring (Sentry, analytics).\n- Documentation (Storybook, README, ADRs)."
       },
       {
         "id": "132",
-        "n": 132,
+        "n": 135,
         "q": "How would you structure a large React project?",
         "a": "Feature-based (domain) structure scales better than grouping by file type:\n```\nsrc/\n  app/            # store setup, providers, router\n  features/\n    auth/         # components, hooks, slice, api, types, tests for auth\n    orders/\n    products/\n  components/     # shared UI (Button, Modal, Table) – design system\n  hooks/          # shared hooks (useDebounce, useMediaQuery)\n  services/       # api client, interceptors\n  utils/          # helpers, formatters\n  constants/\n  types/\n  assets/\n  styles/\n```\nPrinciples: colocate files that change together; each feature exposes a public `index.ts`; avoid deep cross-feature imports; absolute import aliases (`@/features/...`)."
       },
       {
         "id": "133",
-        "n": 133,
+        "n": 136,
         "q": "How do you manage common API services across multiple modules?",
         "a": "- Create a **single API client** (axios instance) with base URL, timeout, default headers, and **interceptors** for auth token, refresh on 401, global error handling, and logging.\n- Wrap endpoints in **service modules** per domain (`userService.getUser(id)`), so components never build URLs directly.\n- Or use **RTK Query** `createApi` with `injectEndpoints` so each module adds its own endpoints to one shared API.\n- Environment-specific config via `.env`; typed request/response models (TypeScript); consistent error format.\n```js\nexport const api = axios.create({ baseURL: import.meta.env.VITE_API_URL, timeout: 15000 });\napi.interceptors.request.use(cfg => { cfg.headers.Authorization = `Bearer ${getToken()}`; return cfg; });\nexport const userService = { getUser: id => api.get(`/users/${id}`).then(r => r.data) };\n```"
       },
       {
         "id": "134",
-        "n": 134,
+        "n": 137,
         "q": "How do you handle application-wide error management?",
         "a": "Layered approach:\n- **Error Boundaries** at app level and around risky widgets/routes for render errors, with a friendly fallback + retry.\n- **API errors**: axios interceptor normalizes errors, handles 401 (refresh/logout), 403 (unauthorized page), 500 (toast); per-request handling in components where needed.\n- **Async/event handler errors**: try/catch; `window.onerror` and `unhandledrejection` listeners as a safety net.\n- **User feedback**: toasts, inline form errors, retry buttons; never show raw stack traces.\n- **Logging/monitoring**: Sentry/Datadog with user context, release version and source maps.\n- Form validation (Zod/Yup) to prevent invalid requests."
       },
       {
         "id": "135",
-        "n": 135,
+        "n": 138,
         "q": "How do you implement role-based access control?",
         "a": "- Backend returns the user's **roles/permissions** after login (in the token or a `/me` endpoint).\n- Store them in Auth context/Redux; prefer **permission-based** checks (`orders:edit`) over hard-coded role names.\n- **Route level**: `ProtectedRoute` with `allowedRoles`/`requiredPermission`.\n- **Component level**: a `<Can>` component or `usePermission()` hook to show/hide/disable buttons and menu items.\n```jsx\nfunction Can({ permission, children, fallback = null }) {\n  const { permissions } = useAuth();\n  return permissions.includes(permission) ? children : fallback;\n}\n<Can permission=\"user:delete\"><DeleteButton /></Can>\n```\n- Build menus/navigation from a config filtered by permission.\n- The **backend must enforce** every permission — frontend RBAC is UX only."
       },
       {
         "id": "136",
-        "n": 136,
+        "n": 139,
         "q": "How do you debug a React application with high CPU utilization?",
         "a": "1. **Reproduce** and open Chrome DevTools **Performance** tab — record, look for long tasks, which functions use the most scripting time (flame chart).\n2. **React DevTools Profiler** — find components re-rendering too often or taking long, and why.\n3. Common culprits: infinite re-render loops (effect setting state it depends on), unthrottled scroll/resize/mousemove handlers, `setInterval` without cleanup, huge lists without virtualization, heavy computations every render, animations via JS instead of CSS, polling too frequently, memory leaks causing GC pressure.\n4. Fix: memoize, throttle/debounce, virtualize, move heavy work to a Web Worker, use `useTransition`/`useDeferredValue`, clean up effects.\n5. Verify with the profiler again and add monitoring."
       },
       {
         "id": "137",
-        "n": 137,
+        "n": 140,
         "q": "How do you identify and fix a memory leak?",
         "a": "**Identify**: Chrome DevTools **Memory** tab — take heap snapshots before/after repeating an action (e.g. open/close a page) and compare; look for growing **Detached DOM nodes** and objects that should have been freed. The Performance monitor shows JS heap growth over time.\n**Common causes in React apps**:\n- Event listeners, intervals, timeouts, subscriptions, WebSockets not cleaned up.\n- Async calls setting state after unmount (cancel with AbortController).\n- Global variables/caches growing forever; closures holding big objects.\n- Third-party libraries (charts, maps) not destroyed on unmount.\n**Fix**: return cleanup functions from `useEffect`, remove listeners, `destroy()` library instances, bound caches (LRU, WeakMap), then re-check with snapshots."
       },
       {
         "id": "138",
-        "n": 138,
+        "n": 141,
         "q": "How do you approach performance monitoring after deploying an application?",
         "a": "- **Real User Monitoring**: track **Core Web Vitals** (LCP, INP, CLS, plus TTFB/FCP) with the `web-vitals` library and send to analytics (GA4, Datadog RUM, New Relic).\n- **Error monitoring**: Sentry with source maps, release tracking and alerts.\n- **Synthetic monitoring**: Lighthouse CI in the pipeline with performance budgets; scheduled checks.\n- Monitor API latency/error rates (APM) and bundle size per release.\n- Dashboards + alerts; compare releases; fix regressions with profiling.\n- React `<Profiler>` API for specific critical components if needed."
       },
       {
         "id": "139",
-        "n": 139,
+        "n": 142,
         "q": "How do you implement accessibility in React?",
         "a": "- Use **semantic HTML** (`button`, `nav`, `main`, `label`, headings in order) instead of clickable `div`s.\n- Every input has a `<label htmlFor>` (`htmlFor` in JSX); images have meaningful `alt` text.\n- **Keyboard support**: everything reachable with Tab, visible focus styles, Escape closes modals, manage focus (move focus into modals and trap it, restore on close) with refs.\n- **ARIA** only when needed: `aria-label`, `aria-expanded`, `aria-live` for dynamic messages, `role=\"alert\"`.\n- Sufficient color contrast; don't rely on color alone.\n- Tools: `eslint-plugin-jsx-a11y`, axe DevTools, Lighthouse, screen reader testing (NVDA/VoiceOver), React Testing Library queries by role.\n- Accessible component libraries (Radix UI, Headless UI, MUI). Target WCAG 2.1 AA."
       },
       {
         "id": "140",
-        "n": 140,
+        "n": 143,
         "q": "How do you use browser DevTools to debug rendering and performance problems?",
         "a": "- **Elements panel**: inspect DOM/CSS, see layout shifts, force states (:hover).\n- **Performance panel**: record an interaction; find long tasks (>50 ms), layout thrashing (\"forced reflow\"), heavy scripting, and paint events. Use CPU throttling to simulate slow devices.\n- **Rendering tab**: Paint flashing, Layout Shift Regions, FPS meter.\n- **Network panel**: slow/duplicate requests, waterfall, large bundles, caching; throttle to 3G.\n- **Memory panel**: heap snapshots for leaks.\n- **Lighthouse**: overall performance/accessibility audit.\n- **React DevTools**: Components tab (props/state/hooks), Profiler (render time and why each component rendered), highlight updates.\n- Sources panel: breakpoints, conditional breakpoints, logpoints."
       }
@@ -967,85 +993,85 @@ window.QUESTIONS = [
     "items": [
       {
         "id": "141",
-        "n": 141,
+        "n": 144,
         "q": "Explain your current project architecture.",
         "a": "Prepare a 2–3 minute structured answer about your real project:\n- **Business context**: what the product does, who uses it, scale (users, modules).\n- **Frontend stack**: React + TypeScript, state management (Redux Toolkit / RTK Query), routing, UI library, styling, build tool (Vite/Webpack), testing.\n- **Architecture**: folder structure, micro-frontends or monolith, shared component library, API layer with interceptors, auth (JWT/SSO).\n- **Backend & infra**: REST/GraphQL APIs, microservices, cloud (AWS/Azure), CI/CD, environments.\n- **Data flow**: UI → API service → backend → DB, and back.\nDraw it on a whiteboard if possible and mention one design decision you made and why."
       },
       {
         "id": "142",
-        "n": 142,
+        "n": 145,
         "q": "What is your role and responsibility in the project?",
         "a": "Answer with specifics and ownership, e.g.:\n- Developing features end-to-end on the frontend: understanding requirements, breaking them into tasks, building reusable components and API integration.\n- Technical ownership of a module (name it), code reviews, defining coding standards.\n- Performance improvements, bug fixing, production support.\n- Collaborating with backend, QA, designers, product owners; sprint planning, estimation in Agile/Scrum.\n- Mentoring juniors, onboarding, documentation.\nUse numbers where you can (\"reduced load time by 40%\", \"led a team of 3\")."
       },
       {
         "id": "143",
-        "n": 143,
+        "n": 146,
         "q": "Explain the complete flow of one feature, from the UI to the backend API.",
         "a": "Pick a real feature (e.g. \"create order\") and walk through:\n1. **UI**: form component with validation (React Hook Form + Zod), state management.\n2. **Action**: on submit → dispatch thunk / RTK Query mutation; button disabled, loading shown.\n3. **API layer**: axios instance adds auth token via interceptor → `POST /api/orders`.\n4. **Backend**: API gateway → auth middleware validates JWT → controller → service with business logic → DB transaction; returns response/status code.\n5. **Response handling**: success → update cache/store (invalidate tags), toast, navigate; error → show message, log to Sentry.\n6. **Cross-cutting**: permissions, error handling, tests (unit + E2E), monitoring."
       },
       {
         "id": "144",
-        "n": 144,
+        "n": 147,
         "q": "What was the most challenging technical problem you faced?",
         "a": "Use the **STAR** format (Situation, Task, Action, Result). Example outline:\n- **Situation**: a dashboard page with 10,000+ rows froze for several seconds / a production memory leak / complex form with dynamic validation.\n- **Task**: what you were responsible for.\n- **Action**: how you investigated (Profiler, heap snapshots, logs), options you considered, what you implemented (virtualization, memoization, pagination with backend, refactor).\n- **Result**: measurable outcome (\"render time from 4s to 300ms\", \"zero crash reports since\") and what you learned.\nPick a story that shows technical depth and ownership."
       },
       {
         "id": "145",
-        "n": 145,
+        "n": 148,
         "q": "Have you improved the performance of an existing application?",
         "a": "Have a concrete story:\n- **Measured** first: Lighthouse, Web Vitals, React Profiler, bundle analyzer.\n- **Changes** (pick yours): route-based code splitting and lazy loading; removed/replaced heavy libraries (moment → dayjs, full lodash → per-method imports); virtualization for big tables; memoized expensive components/selectors; API caching with RTK Query and fewer duplicate calls; image optimization; debounced search.\n- **Result** with numbers: \"bundle 2.1MB → 900KB\", \"LCP 4.2s → 1.8s\", \"Lighthouse 55 → 90\".\n- How you kept it from regressing: performance budgets in CI, monitoring."
       },
       {
         "id": "146",
-        "n": 146,
+        "n": 149,
         "q": "How did you identify and resolve a production issue?",
         "a": "STAR story, e.g.:\n- **Detection**: alert from Sentry/monitoring or user reports (e.g. blank page for some users after a release).\n- **Triage**: check impact and severity, reproduce in the same browser/env, read logs and error traces with source maps, check what changed in the last release.\n- **Root cause**: e.g. an API returned `null` for an optional field and the UI called `.map` on it; or a cached old chunk caused \"ChunkLoadError\" after deploy.\n- **Fix**: hotfix or rollback first to restore service, then proper fix with tests.\n- **Prevention**: defensive checks / schema validation, Error Boundary, added test case, RCA document, monitoring alert."
       },
       {
         "id": "147",
-        "n": 147,
+        "n": 150,
         "q": "How do you handle a production bug reported by a client?",
         "a": "1. **Acknowledge** quickly, gather details: steps, environment, browser, user, screenshots, time.\n2. **Assess severity/impact** (P1 blocks business → immediate response; minor → plan in sprint).\n3. **Reproduce** (same data/role/browser), check logs, Sentry, network traces.\n4. Find the **root cause**; for critical issues, apply a hotfix or rollback / feature flag off.\n5. Test the fix (QA, regression), deploy through the proper pipeline.\n6. **Communicate** status and ETA to the client throughout.\n7. **RCA** and preventive action: tests, monitoring, process change."
       },
       {
         "id": "148",
-        "n": 148,
+        "n": 151,
         "q": "What would you do if a client requested a last-minute change during UAT?",
         "a": "- Understand the request and **why** it's needed (business urgency).\n- Analyse **impact**: effort, risk, affected areas, testing needed, effect on the release date.\n- Communicate options to the client/PO: include it now with a revised timeline, ship it in a fast follow-up release, or release behind a **feature flag**.\n- Get a decision from the product owner/stakeholders — don't silently absorb scope.\n- If accepted: follow change management, update estimates, ensure regression testing, document it.\nShow that you balance flexibility with quality and transparency."
       },
       {
         "id": "149",
-        "n": 149,
+        "n": 152,
         "q": "How do you handle code reviews?",
         "a": "**As a reviewer**:\n- Check correctness, readability, edge cases, error handling, performance (re-renders, unnecessary API calls), security (XSS, secrets), accessibility, tests, and adherence to standards.\n- Keep comments constructive and specific; explain *why*; distinguish blocking issues from suggestions (\"nit:\"); praise good solutions.\n- Review small PRs promptly.\n**As an author**: small focused PRs, clear description and screenshots, self-review first, respond openly to feedback.\nAutomate the trivial stuff (ESLint, Prettier, type checks, tests in CI) so humans focus on logic and design."
       },
       {
         "id": "150",
-        "n": 150,
+        "n": 153,
         "q": "How do you ensure code quality across a development team?",
         "a": "- **Standards**: documented coding guidelines, TypeScript strict mode, ESLint + Prettier, consistent folder structure.\n- **Automation**: Husky + lint-staged pre-commit hooks; CI that runs lint, type-check, unit tests, build; SonarQube for code smells/coverage.\n- **Testing**: unit (Jest/Vitest + React Testing Library), E2E (Cypress/Playwright), coverage targets for critical areas.\n- **Process**: mandatory PR reviews, PR templates, definition of done.\n- **Reusability**: shared component library + Storybook.\n- **Knowledge sharing**: tech talks, pairing, documentation, ADRs; tracking tech debt."
       },
       {
         "id": "151",
-        "n": 151,
+        "n": 154,
         "q": "How do you handle disagreements about technical implementation?",
         "a": "- Listen to the other person's reasoning fully; focus on the problem, not the person.\n- Compare options with **objective criteria**: requirements, performance, maintainability, team familiarity, timeline, cost.\n- Back arguments with data — build a quick POC, benchmark, or reference docs/best practices.\n- If still no agreement, involve the tech lead/architect and **commit to the decision** once made (\"disagree and commit\").\n- Document the decision (ADR).\nGive a short real example if you have one."
       },
       {
         "id": "152",
-        "n": 152,
+        "n": 155,
         "q": "How do you estimate development effort?",
         "a": "- Clarify requirements and acceptance criteria first; break the feature into small tasks (UI, API integration, state, validation, tests, edge cases).\n- Estimate each task using past experience/similar work; in Agile, use **story points** (Planning Poker) relative to reference stories.\n- Add time for code review, testing, bug fixing, and **buffer for unknowns/risks**; do a spike if something is new.\n- Consider dependencies (backend APIs, design).\n- Communicate assumptions; re-estimate when scope changes; track actual vs estimate to improve."
       },
       {
         "id": "153",
-        "n": 153,
+        "n": 156,
         "q": "Have you mentored junior developers?",
         "a": "Give concrete examples:\n- Onboarding new joiners: walking through architecture, setup, coding standards.\n- Detailed, educational code reviews; pair programming on tough tasks.\n- Assigning progressively harder tasks and being available for questions.\n- Knowledge sessions (hooks, Redux Toolkit, testing), writing docs/guides.\n- Result: \"two juniors became independent on module X within 3 months\".\nIf you haven't formally, describe informal mentoring and your approach."
       },
       {
         "id": "154",
-        "n": 154,
+        "n": 157,
         "q": "How do you decide whether to use an existing library or build a custom solution?",
         "a": "Evaluate:\n- **Requirements fit**: does the library solve our case fully, or would we fight it?\n- **Quality and health**: maintenance activity, community, open issues, documentation, TypeScript support.\n- **Cost**: bundle size, performance, license (MIT vs GPL/commercial), security vulnerabilities.\n- **Customization** needs and long-term maintenance cost of a custom build.\n- **Time-to-market** and team familiarity.\nRule of thumb: use well-maintained libraries for solved, complex problems (dates, forms, data fetching, charts, accessibility primitives); build custom when the need is small/simple or core to the business and the library would add a lot of weight. Wrap third-party libraries behind your own interface so they can be replaced."
       }
@@ -1056,61 +1082,61 @@ window.QUESTIONS = [
     "items": [
       {
         "id": "155",
-        "n": 155,
+        "n": 158,
         "q": "What is the difference between interface and type?",
         "a": "Both describe object shapes and are mostly interchangeable for objects.\n- **interface**: only object shapes; can be **extended** with `extends` and **merged** by re-declaring (declaration merging — useful for augmenting libraries); classes can `implements` them.\n- **type**: can describe anything — **unions**, intersections, primitives, tuples, mapped and conditional types (`type Status = 'idle' | 'loading'`); can't be re-opened.\n```ts\ninterface User { id: number; name: string }\ninterface Admin extends User { role: 'admin' }\n\ntype ID = string | number;\ntype AdminT = User & { role: 'admin' };\n```\nCommon convention: `interface` for object/props/public API shapes, `type` for unions and utility compositions."
       },
       {
         "id": "156",
-        "n": 156,
+        "n": 159,
         "q": "What is the difference between any and unknown?",
         "a": "- **any**: turns off type checking — you can do anything with it, and it spreads silently. Unsafe.\n- **unknown**: the type-safe counterpart: any value can be assigned to it, but you **must narrow it** (typeof, instanceof, type guard) before using it.\n```ts\nlet a: any = JSON.parse(text);\na.foo.bar();               // compiles, may crash at runtime\n\nlet u: unknown = JSON.parse(text);\n// u.foo;                  // error\nif (typeof u === 'object' && u !== null && 'foo' in u) { /* safe */ }\n```\nUse `unknown` for API responses, `catch (e)` errors, and third-party input; validate with a schema library (Zod)."
       },
       {
         "id": "157",
-        "n": 157,
+        "n": 160,
         "q": "Explain Partial, Required, Pick and Omit.",
         "a": "Built-in utility types that transform other types:\n```ts\ninterface User { id: number; name: string; email?: string }\n\ntype A = Partial<User>;          // all optional: { id?; name?; email? }  — e.g. update payloads\ntype B = Required<User>;         // all required, email no longer optional\ntype C = Pick<User, 'id' | 'name'>;   // only id and name\ntype D = Omit<User, 'email'>;    // everything except email\n```\nOthers worth mentioning: `Readonly<T>`, `Record<K, V>`, `ReturnType<F>`, `Parameters<F>`, `Exclude`, `Extract`, `NonNullable`, `Awaited`."
       },
       {
         "id": "158",
-        "n": 158,
+        "n": 161,
         "q": "How do you define props for a TypeScript functional component?",
         "a": "```tsx\ninterface ButtonProps {\n  label: string;\n  variant?: 'primary' | 'secondary';      // optional with union\n  onClick: (e: React.MouseEvent<HTMLButtonElement>) => void;\n  children?: React.ReactNode;\n}\n\nfunction Button({ label, variant = 'primary', onClick, children }: ButtonProps) {\n  return <button className={variant} onClick={onClick}>{label}{children}</button>;\n}\n\n// extend native element props\ntype InputProps = React.ComponentPropsWithoutRef<'input'> & { label: string };\n\n// generic component\nfunction List<T>({ items, render }: { items: T[]; render: (item: T) => React.ReactNode }) {\n  return <ul>{items.map(render)}</ul>;\n}\n```\n`React.FC` is optional; most teams type props directly. Use `React.ReactNode` for children."
       },
       {
         "id": "159",
-        "n": 159,
+        "n": 162,
         "q": "What is the difference between React.js and Next.js?",
         "a": "- **React** is a UI **library**: components and rendering. You choose routing, data fetching, bundling, SSR setup yourself; typically a client-rendered SPA.\n- **Next.js** is a **framework** built on React that adds: file-based routing, SSR/SSG/ISR, React Server Components, API routes/route handlers, server actions, image/font/script optimization, middleware, built-in code splitting, and easy deployment (Vercel or Node).\nNext.js gives better SEO and initial load and full-stack capability; plain React (Vite) is simpler for internal dashboards or apps behind login where SEO doesn't matter."
       },
       {
         "id": "160",
-        "n": 160,
+        "n": 163,
         "q": "What is the difference between App Router and Pages Router?",
         "a": "- **Pages Router** (`pages/` dir, older): each file is a route; data fetching with `getServerSideProps`, `getStaticProps`, `getStaticPaths`; all components are client components; layouts via `_app.js`/`_document.js`; API routes in `pages/api`.\n- **App Router** (`app/` dir, Next 13+, recommended): built on **React Server Components** (server by default, `'use client'` to opt in); nested **layouts** (`layout.js`), `loading.js` and `error.js` per segment; data fetching with `async` components and `fetch` caching options; streaming with Suspense; **Server Actions**; route handlers (`route.js`).\nApp Router ships less JS and gives more flexible layouts; Pages Router is simpler and still supported."
       },
       {
         "id": "161",
-        "n": 161,
+        "n": 164,
         "q": "What is server-side rendering?",
         "a": "Server-side rendering generates the page's HTML **on the server for each request**, sends it to the browser (so content is visible immediately), then React **hydrates** it to make it interactive.\n- **Pros**: faster first contentful paint, better SEO and social previews, data is fresh per request, works on slow devices.\n- **Cons**: more server load and cost, slower TTFB than static, hydration cost, need to handle browser-only APIs carefully.\nIn Next.js: Pages Router `getServerSideProps`; App Router — server components with dynamic data (`cache: 'no-store'` / `dynamic = 'force-dynamic'`)."
       },
       {
         "id": "162",
-        "n": 162,
+        "n": 165,
         "q": "What is dynamic routing in Next.js?",
         "a": "Routes with variable segments, defined by brackets in the file name:\n- App Router: `app/products/[id]/page.js` → `/products/123`; access with `params` prop (`params.id`) or `useParams()` in client components.\n- Catch-all: `[...slug]` (`/docs/a/b`), optional catch-all: `[[...slug]]`.\n- Pages Router: `pages/products/[id].js` with `useRouter().query.id`.\n- Pre-generate pages at build time with `generateStaticParams` (App Router) or `getStaticPaths` (Pages Router).\n```jsx\n// app/products/[id]/page.js\nexport default async function Product({ params }) {\n  const { id } = await params;   // params is a promise in Next 15+\n  const product = await getProduct(id);\n  return <h1>{product.title}</h1>;\n}\n```"
       },
       {
         "id": "163",
-        "n": 163,
+        "n": 166,
         "q": "How do you handle API routes in Next.js?",
         "a": "- **Pages Router**: files in `pages/api/` become endpoints: `export default function handler(req, res) { res.status(200).json({...}) }`.\n- **App Router**: **Route Handlers** in `app/api/.../route.js` exporting functions per HTTP method:\n```js\n// app/api/users/route.js\nexport async function GET(request) {\n  const users = await db.user.findMany();\n  return Response.json(users);\n}\nexport async function POST(request) {\n  const body = await request.json();\n  const user = await db.user.create({ data: body });\n  return Response.json(user, { status: 201 });\n}\n```\nThey run on the server (Node or Edge runtime), so you can use secrets, DB access, and act as a BFF/proxy. For form mutations, **Server Actions** are an alternative. Add auth checks, validation and error handling."
       },
       {
         "id": "164",
-        "n": 164,
+        "n": 167,
         "q": "How does Next.js improve SEO?",
         "a": "- **Pre-rendered HTML** (SSR/SSG/ISR): crawlers see full content immediately instead of an empty `div` waiting for JS.\n- **Metadata API** (`export const metadata` / `generateMetadata`) or `next/head`: titles, descriptions, Open Graph/Twitter tags, canonical URLs per page.\n- **Performance / Core Web Vitals** (ranking factor): automatic code splitting, `next/image` (lazy, responsive, modern formats), `next/font` (no layout shift), `next/script` strategies.\n- Clean, file-based URLs and dynamic routes; `sitemap.js` and `robots.js` generation; structured data (JSON-LD)."
       }

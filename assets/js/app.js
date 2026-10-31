@@ -310,8 +310,40 @@
     refresh();
   }));
 
-  $('#reset').addEventListener('click', () => {
-    if (!confirm('Reset all progress? This unticks every question.')) return;
+  // ---------- Confirm dialog (replaces the browser's confirm()) ----------
+  const dlg = $('#confirmDialog');
+  function confirmDialog({ title, message, confirmText = 'Confirm' }) {
+    if (typeof dlg.showModal !== 'function') return Promise.resolve(confirm(`${title}
+
+${message}`));
+    $('#confirmTitle').textContent = title;
+    $('#confirmMsg').textContent = message;
+    $('#confirmOk').textContent = confirmText;
+    dlg.showModal();
+    $('#confirmCancel').focus(); // safer default for destructive actions
+    return new Promise(resolve => { settle = resolve; });
+  }
+  let settle = null;
+  function finish(ok) {
+    if (dlg.open) dlg.close();
+    if (settle) { const s = settle; settle = null; s(ok); }
+  }
+  $('#confirmOk').addEventListener('click', () => finish(true));
+  $('#confirmCancel').addEventListener('click', () => finish(false));
+  dlg.addEventListener('click', e => { if (e.target === dlg) finish(false); }); // backdrop
+  dlg.addEventListener('cancel', e => { e.preventDefault(); finish(false); });  // Escape
+  dlg.addEventListener('close', () => finish(false));                          // any other close
+
+  $('#reset').addEventListener('click', async () => {
+    const done = Object.keys(state).length;
+    const ok = await confirmDialog({
+      title: 'Reset progress?',
+      message: done
+        ? `This unticks the ${done} question${done === 1 ? '' : 's'} you've marked as done. Your starred questions are kept. This can't be undone.`
+        : "You haven't ticked any questions yet, so there's nothing to reset. Your starred questions are kept either way.",
+      confirmText: 'Reset progress',
+    });
+    if (!ok) return;
     for (const k in state) delete state[k];
     save();
     allItems.forEach(li => { $('.check', li).checked = false; li.classList.remove('done'); });

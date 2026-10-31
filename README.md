@@ -4,12 +4,12 @@
 
 # Frontend Interview Prep
 
-**176 frontend interview questions with clear answers. Practise, check yourself, track your progress and star questions to review later.**
+**180 frontend interview questions with clear answers. Practise, check yourself, track your progress and star questions to review later.**
 
 [**Open the live app →**](https://frontend-interview-prod.vercel.app)
 
 [![Deployed on Vercel](https://img.shields.io/badge/deployed%20on-Vercel-000?logo=vercel&logoColor=white)](https://frontend-interview-prod.vercel.app)
-![Questions](https://img.shields.io/badge/questions-176-4f46e5)
+![Questions](https://img.shields.io/badge/questions-180-4f46e5)
 ![No dependencies](https://img.shields.io/badge/dependencies-0-059669)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 
@@ -38,9 +38,9 @@ The recommended way to use it:
 | 1 | React core concepts | 20 |
 | 2 | React hooks | 21 |
 | 3 | Redux & state management | 15 |
-| 4 | JavaScript fundamentals | 23 |
+| 4 | JavaScript fundamentals | 25 |
 | 5 | React performance optimization | 15 |
-| 6 | Machine coding & JavaScript programming | 22 |
+| 6 | Machine coding & JavaScript programming | 24 |
 | 7 | API handling & real-world scenarios | 15 |
 | 8 | Frontend architecture & senior-level topics | 15 |
 | 9 | Project & behavioural questions | 14 |

@@ -439,10 +439,31 @@ pre code { font-variant-ligatures: none; background: none; color: inherit; paddi
 .footer p { margin: 0; }
 .footer .footer-more { flex-basis: 100%; }
 
+/* ---------- Confirm dialog ---------- */
+
+.modal {
+  width: min(420px, calc(100vw - 32px)); padding: 22px 22px 18px; margin: auto;
+  background: var(--surface); color: var(--text);
+  border: 1px solid var(--line); border-radius: 14px;
+  box-shadow: 0 20px 50px rgb(0 0 0 / 0.25);
+}
+.modal::backdrop { background: rgb(10 12 18 / 0.55); backdrop-filter: blur(2px); }
+.modal[open] { animation: modal-in .16s ease-out; }
+.modal[open]::backdrop { animation: fade-in .16s ease-out; }
+@keyframes modal-in { from { opacity: 0; transform: translateY(8px) scale(.98); } }
+@keyframes fade-in { from { opacity: 0; } }
+.modal-title { margin: 0 0 8px; font-size: 17px; font-weight: 650; }
+.modal-msg { margin: 0; color: var(--text-2); font-size: 14.5px; line-height: 1.55; }
+.modal-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 22px; }
+.modal-actions .btn { padding: 8px 14px; }
+.btn-solid-danger { background: var(--danger); border-color: var(--danger); color: var(--surface); }
+.btn-solid-danger:hover { background: color-mix(in srgb, var(--danger) 88%, #000); border-color: transparent; color: var(--surface); }
+@media (max-width: 600px) { .modal-actions .btn { flex: 1; } }
+
 .noscript { text-align: center; padding: 24px; color: var(--danger); }
 
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after { transition: none !important; scroll-behavior: auto !important; }
+  *, *::before, *::after { transition: none !important; animation: none !important; scroll-behavior: auto !important; }
 }
 
 @media print {
