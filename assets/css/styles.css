@@ -432,6 +432,7 @@ pre code { font-variant-ligatures: none; background: none; color: inherit; paddi
 .footer { border-top: 1px solid var(--line); padding: 24px 0 32px; color: var(--muted); font-size: 13.5px; }
 .footer-inner { display: flex; flex-wrap: wrap; gap: 8px 24px; justify-content: space-between; }
 .footer p { margin: 0; }
+.footer .footer-more { flex-basis: 100%; }
 
 .noscript { text-align: center; padding: 24px; color: var(--danger); }
 
