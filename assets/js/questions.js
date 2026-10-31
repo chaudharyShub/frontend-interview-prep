@@ -6,7 +6,6 @@
  *   n     – display number
  *   q     – question text
  *   a     – answer (light Markdown: paragraphs, - lists, 1. lists, `code`, **bold**, ``` fences)
- *   top   – optional, true for priority questions
  *   note  – optional hint shown under the question
  *   code  – optional code snippet shown with the question
  *   group – optional sub-heading inside a section
@@ -25,21 +24,18 @@ window.QUESTIONS = [
         "id": "2",
         "n": 2,
         "q": "What is Virtual DOM? How does React update the actual DOM?",
-        "top": true,
         "a": "The Virtual DOM is a lightweight JavaScript object tree that represents the real DOM.\n- When state/props change, React re-runs the component and creates a **new** virtual tree.\n- It **diffs** the new tree against the previous one (reconciliation).\n- It computes the minimal set of changes and applies them to the real DOM in a batch (the **commit** phase).\nReal DOM operations (layout, paint) are expensive; JS object comparisons are cheap, so this keeps updates fast and lets you write code as if you re-render everything."
       },
       {
         "id": "3",
         "n": 3,
         "q": "Explain React reconciliation.",
-        "top": true,
         "a": "Reconciliation is the algorithm React uses to decide what changed between two renders. It uses heuristics to run in O(n) instead of O(n³):\n- **Different element type** (e.g. `<div>` → `<span>`, or `CompA` → `CompB`): tear down the old subtree (unmount, lose state) and build a new one.\n- **Same type**: keep the DOM node / component instance, only update changed attributes/props, then recurse into children.\n- **Lists**: children are matched by `key`, so items can be reordered, inserted or removed efficiently.\nSince React 16, reconciliation is done by **Fiber**, which splits the work into units that can be paused, prioritized and resumed (enables concurrent features like `useTransition`). Rendering is split into the **render phase** (pure, interruptible) and the **commit phase** (DOM mutations, synchronous)."
       },
       {
         "id": "4",
         "n": 4,
         "q": "What is the purpose of the key prop when rendering lists?",
-        "top": true,
         "a": "`key` gives each list item a stable identity so React can match items between renders.\n- Without keys React matches by position, so inserting at the top makes every item \"change\".\n- With keys React knows which item was added, removed or moved, and keeps the right component state and DOM node for each item.\nKeys must be **unique among siblings** and **stable** (e.g. a database id). They are not passed to the component as a prop.\n```jsx\n{users.map(u => <UserRow key={u.id} user={u} />)}\n```"
       },
       {
@@ -70,14 +66,12 @@ window.QUESTIONS = [
         "id": "9",
         "n": 9,
         "q": "What is the difference between props and state?",
-        "top": true,
         "a": "- **Props**: inputs passed from parent to child. Read-only inside the child. Changing them is the parent's job.\n- **State**: data owned and managed inside the component; changing it (via `setState`/setter) triggers a re-render.\nBoth trigger re-renders when they change. Rule of thumb: if the data can be computed from props or other state, it should not be state at all (derive it during render)."
       },
       {
         "id": "10",
         "n": 10,
         "q": "What is the difference between controlled and uncontrolled components?",
-        "top": true,
         "a": "- **Controlled**: the form value lives in React state; the input shows `value` and updates through `onChange`. React is the single source of truth — easy validation, formatting, conditional disabling.\n- **Uncontrolled**: the DOM keeps the value; you read it with a `ref` when needed (`defaultValue` for initial value). Less code, fewer re-renders, good for simple forms or file inputs (`<input type=\"file\">` is always uncontrolled).\n```jsx\n// controlled\n<input value={name} onChange={e => setName(e.target.value)} />\n// uncontrolled\nconst ref = useRef();\n<input defaultValue=\"\" ref={ref} />  // read ref.current.value on submit\n```\nLibraries like React Hook Form use uncontrolled inputs for performance."
       },
       {
@@ -96,7 +90,6 @@ window.QUESTIONS = [
         "id": "13",
         "n": 13,
         "q": "How can a child component update the state of its parent?",
-        "top": true,
         "a": "The parent passes a **callback function** as a prop; the child calls it with new data.\n```jsx\nfunction Parent() {\n  const [msg, setMsg] = useState('');\n  return <Child onSend={setMsg} />;\n}\nfunction Child({ onSend }) {\n  return <button onClick={() => onSend('Hi from child')}>Send</button>;\n}\n```\nOther options: shared Context with a setter, or a global store (Redux). Data still flows down; events flow up."
       },
       {
@@ -168,7 +161,6 @@ window.QUESTIONS = [
         "id": "24",
         "n": 24,
         "q": "What is the difference between useState() and useRef()?",
-        "top": true,
         "a": "- **Re-render**: updating state triggers a re-render; changing `ref.current` does not.\n- **Update timing**: state updates are asynchronous/batched (new value visible on next render); ref changes are immediate and synchronous.\n- **Use for**: state = anything shown in the UI. Ref = DOM element access (focus, scroll, measure), and mutable values that must persist between renders without re-rendering (timer ids, previous value, \"is mounted\" flag, latest callback).\n```jsx\nconst inputRef = useRef(null);\n<input ref={inputRef} />;  inputRef.current.focus();\n```"
       },
       {
@@ -187,7 +179,6 @@ window.QUESTIONS = [
         "id": "27",
         "n": 27,
         "q": "Explain useEffect() and its execution lifecycle.",
-        "top": true,
         "a": "`useEffect` runs side effects (API calls, subscriptions, timers, manual DOM work, logging) **after** React has rendered and painted the screen.\nLifecycle:\n1. Component renders, DOM is updated, browser paints.\n2. Effect runs.\n3. On the next render, if dependencies changed: the previous effect's **cleanup** runs, then the new effect.\n4. On unmount: the cleanup runs.\n```jsx\nuseEffect(() => {\n  const id = setInterval(tick, 1000);\n  return () => clearInterval(id);   // cleanup\n}, []);\n```\nIn development with StrictMode (React 18), effects run mount → cleanup → mount once to help you find missing cleanups."
       },
       {
@@ -207,7 +198,6 @@ window.QUESTIONS = [
         "id": "30",
         "n": 30,
         "q": "What is the cleanup function in useEffect()? When does it execute?",
-        "top": true,
         "a": "The cleanup is the function you return from `useEffect`. It undoes what the effect did (clear timers, remove listeners, unsubscribe, abort fetches).\nIt runs:\n- **Before the effect runs again** (when dependencies change) — with the *old* values.\n- **When the component unmounts.**\n```jsx\nuseEffect(() => {\n  const onResize = () => setWidth(window.innerWidth);\n  window.addEventListener('resize', onResize);\n  return () => window.removeEventListener('resize', onResize);\n}, []);\n```"
       },
       {
@@ -226,14 +216,12 @@ window.QUESTIONS = [
         "id": "33",
         "n": 33,
         "q": "What is useMemo()? When should you use it?",
-        "top": true,
         "a": "`useMemo` caches the **result** of a calculation between renders and recomputes only when dependencies change.\n```jsx\nconst filtered = useMemo(\n  () => products.filter(p => p.name.includes(search)),\n  [products, search]\n);\n```\nUse it when:\n- A calculation is genuinely expensive (big lists, sorting, heavy math).\n- You need a **stable reference** for an object/array passed to a `React.memo` child or used as an effect dependency.\nDon't wrap every value — memoization has its own cost and makes code harder to read."
       },
       {
         "id": "34",
         "n": 34,
         "q": "What is useCallback()? When should you use it?",
-        "top": true,
         "a": "`useCallback` caches a **function** definition between renders so it keeps the same reference until dependencies change. `useCallback(fn, deps)` ≈ `useMemo(() => fn, deps)`.\n```jsx\nconst handleDelete = useCallback(id => {\n  setItems(items => items.filter(i => i.id !== id));\n}, []);\n<Row onDelete={handleDelete} />   // Row is React.memo\n```\nUse it when passing callbacks to **memoized children**, or when the function is a dependency of `useEffect`/another hook. Without a memoized child it gives no benefit."
       },
       {
@@ -246,7 +234,6 @@ window.QUESTIONS = [
         "id": "36",
         "n": 36,
         "q": "What is useReducer()? How is it different from useState()?",
-        "top": true,
         "a": "`useReducer` manages state with a reducer function `(state, action) => newState`, similar to Redux but local.\n```jsx\nfunction reducer(state, action) {\n  switch (action.type) {\n    case 'increment': return { count: state.count + 1 };\n    case 'reset': return { count: 0 };\n    default: return state;\n  }\n}\nconst [state, dispatch] = useReducer(reducer, { count: 0 });\ndispatch({ type: 'increment' });\n```\nPrefer it over `useState` when state is complex (many related fields), the next state depends on the previous in several ways, or you want update logic in one testable place. `dispatch` is stable, so it's easy to pass down (often combined with Context)."
       },
       {
@@ -295,7 +282,6 @@ window.QUESTIONS = [
         "id": "42",
         "n": 42,
         "q": "Explain the complete Redux data flow.",
-        "top": true,
         "a": "1. The user does something in the UI (clicks \"Add to cart\").\n2. The component **dispatches an action**: `dispatch({ type: 'cart/add', payload: item })`.\n3. The action passes through any **middleware** (thunk, saga, logger) — async work happens here.\n4. The store calls the **reducer** with `(currentState, action)`; the reducer returns a **new state** (immutably).\n5. The store saves the new state and notifies subscribers.\n6. Components subscribed via `useSelector` re-render only if the selected slice changed.\nData flows in one direction: **View → Action → (Middleware) → Reducer → Store → View**."
       },
       {
@@ -314,7 +300,6 @@ window.QUESTIONS = [
         "id": "45",
         "n": 45,
         "q": "What is the difference between Redux Thunk and Redux Saga?",
-        "top": true,
         "a": "- **Redux Thunk**: lets you dispatch a **function** instead of an object. The function receives `dispatch` and `getState` and can do async work with promises/async-await. Simple, small learning curve, good for most API calls.\n- **Redux Saga**: uses **generator functions** that listen for actions and run side effects declaratively (`call`, `put`, `takeLatest`, `fork`, `race`). Better for complex flows: cancellation, debouncing, retries, polling, parallel tasks, websockets; very testable. Larger learning curve and more boilerplate.\n```js\n// thunk\nexport const fetchUsers = () => async dispatch => {\n  dispatch({ type: 'users/loading' });\n  const data = await api.getUsers();\n  dispatch({ type: 'users/loaded', payload: data });\n};\n```\nToday Redux recommends Thunk (`createAsyncThunk`) or RTK Query by default."
       },
       {
@@ -327,7 +312,6 @@ window.QUESTIONS = [
         "id": "47",
         "n": 47,
         "q": "What is Redux Toolkit? Why is it preferred over traditional Redux?",
-        "top": true,
         "a": "Redux Toolkit (RTK) is the official, recommended way to write Redux. It removes most boilerplate:\n- `configureStore`: store setup with good defaults (thunk, DevTools, dev-time checks for mutation/serializability).\n- `createSlice`: reducers + action creators + action types in one place.\n- **Immer** built in: write \"mutating\" code that produces immutable updates.\n- `createAsyncThunk` for async logic with pending/fulfilled/rejected actions.\n- `createEntityAdapter` for normalized data; `createSelector` for memoized selectors.\n- **RTK Query** for data fetching and caching.\nLess code, fewer bugs (no accidental mutation), consistent structure."
       },
       {
@@ -358,7 +342,6 @@ window.QUESTIONS = [
         "id": "52",
         "n": 52,
         "q": "How would you manage global state in a large-scale application?",
-        "top": true,
         "a": "- Separate state types: **server state** (API data) → RTK Query / React Query; **global client state** (auth, preferences, cart) → Redux Toolkit; **local UI state** → `useState`; **URL state** → router query params; **form state** → React Hook Form.\n- Organize Redux by **feature slices** (`features/cart/cartSlice.js`), not by file type.\n- **Normalize** data (by id, `createEntityAdapter`) to avoid duplication.\n- Use **memoized selectors** and keep components subscribed to the smallest slice.\n- Keep state minimal; derive values with selectors instead of storing them.\n- Lazy-load reducers for large / micro-frontend apps; use TypeScript for typed state and actions."
       },
       {
@@ -388,7 +371,6 @@ window.QUESTIONS = [
         "id": "56",
         "n": 56,
         "q": "What are closures? Give a real-world example.",
-        "top": true,
         "a": "A closure is a function bundled with references to the variables of the scope where it was created, so it can still access them after the outer function has returned.\n```js\nfunction createCounter() {\n  let count = 0;                 // private\n  return {\n    increment: () => ++count,\n    get: () => count,\n  };\n}\nconst c = createCounter(); c.increment(); c.get(); // 1\n```\nReal-world uses: **data privacy** (module pattern), **debounce/throttle** (keep the timer id), **memoization caches**, function factories/currying, event handlers remembering values, and React hooks themselves (every handler closes over that render's state)."
       },
       {
@@ -401,7 +383,6 @@ window.QUESTIONS = [
         "id": "58",
         "n": 58,
         "q": "Explain the JavaScript event loop.",
-        "top": true,
         "a": "JavaScript is single-threaded with one **call stack**. The event loop lets it handle async work without blocking:\n1. Synchronous code runs on the call stack.\n2. Async APIs (timers, fetch, DOM events) are handled by the browser/Node (Web APIs); when done, their callbacks are queued.\n3. When the call stack is empty, the event loop first runs **all microtasks** (Promise `.then`, `queueMicrotask`, `MutationObserver`, `await` continuations).\n4. Then the browser may render, and the loop takes **one macrotask** (setTimeout, setInterval, I/O, UI events) and repeats.\n```js\nconsole.log(1);\nsetTimeout(() => console.log(2), 0);\nPromise.resolve().then(() => console.log(3));\nconsole.log(4);\n// 1 4 3 2\n```"
       },
       {
@@ -426,7 +407,6 @@ window.QUESTIONS = [
         "id": "62",
         "n": 62,
         "q": "Explain hoisting in JavaScript.",
-        "top": true,
         "a": "Hoisting: during the creation phase, JS registers declarations in memory before executing code, so they behave as if moved to the top of their scope.\n- **Function declarations**: fully hoisted — can be called before they're defined.\n- **var**: hoisted and initialized to `undefined`.\n- **let/const/class**: hoisted but not initialized (Temporal Dead Zone) → ReferenceError before the declaration.\n- **Function expressions/arrow functions** assigned to variables follow the variable's rules.\n```js\nconsole.log(a); // undefined\nvar a = 5;\ngreet();        // works\nfunction greet() {}\nconsole.log(b); // ReferenceError\nlet b = 1;\nsayHi();        // TypeError: sayHi is not a function\nvar sayHi = () => {};\n```"
       },
       {
@@ -451,7 +431,6 @@ window.QUESTIONS = [
         "id": "66",
         "n": 66,
         "q": "What is event bubbling and event capturing?",
-        "top": true,
         "a": "When an event fires on an element, it travels in three phases:\n1. **Capturing**: from `window` down through ancestors to the target.\n2. **Target** phase.\n3. **Bubbling**: from the target back up to `window`.\n`addEventListener(type, handler)` listens in the bubbling phase by default; pass `{ capture: true }` (or `true`) for capturing.\n```js\nparent.addEventListener('click', () => console.log('parent'));\nchild.addEventListener('click', () => console.log('child'));\n// click child → \"child\", then \"parent\"\n```\n`e.stopPropagation()` stops further travel; `e.preventDefault()` only stops the default browser action. Some events don't bubble (`focus`, `blur` — use `focusin/focusout`)."
       },
       {
@@ -482,7 +461,6 @@ window.QUESTIONS = [
         "id": "71",
         "n": 71,
         "q": "What is the difference between Promise.all() and Promise.allSettled()?",
-        "top": true,
         "a": "- **`Promise.all(promises)`**: resolves with an array of all values when **all** fulfil; **rejects immediately** when any one rejects (fail-fast). Use when all results are required (e.g. page needs all data).\n- **`Promise.allSettled(promises)`**: waits for **all** to settle and never rejects; returns `[{status: 'fulfilled', value}, {status: 'rejected', reason}]`. Use when calls are independent and you want partial results (e.g. dashboard widgets).\n```js\nconst results = await Promise.allSettled([getUser(), getOrders()]);\nresults.forEach(r => r.status === 'fulfilled' ? use(r.value) : log(r.reason));\n```\nAlso: `Promise.race` (first to settle) and `Promise.any` (first to fulfil; rejects only if all reject)."
       },
       {
@@ -501,7 +479,6 @@ window.QUESTIONS = [
         "id": "74",
         "n": 74,
         "q": "What is the difference between debounce and throttle?",
-        "top": true,
         "a": "Both limit how often a function runs during rapid events.\n- **Debounce**: runs the function only **after the events stop** for X ms; each new event resets the timer. Use for search-as-you-type, autosave, window resize end, form validation.\n- **Throttle**: runs the function **at most once every X ms** during continuous events. Use for scroll, mousemove, infinite scroll checks, button spam protection, analytics.\nExample: typing for 2 seconds with 300 ms wait — debounce calls once (at the end); throttle calls about 7 times."
       },
       {
@@ -642,7 +619,6 @@ window.QUESTIONS = [
         "q": "Find the frequency of elements in an array.",
         "code": "const arr = [1, 2, 1, 2, 3, 3, 2, 1];\n\n// Expected output:\n// { 1: 3, 2: 3, 3: 2 }",
         "group": "JavaScript coding",
-        "top": true,
         "a": "```js\nfunction elementFrequency(arr) {\n  return arr.reduce((acc, item) => {\n    acc[item] = (acc[item] || 0) + 1;\n    return acc;\n  }, {});\n}\nelementFrequency([1, 2, 1, 2, 3, 3, 2, 1]); // { 1: 3, 2: 3, 3: 2 }\n\n// Use a Map if you need to keep the original key types (numbers, objects)\nconst m = new Map();\narr.forEach(x => m.set(x, (m.get(x) || 0) + 1));\n```\nTime O(n)."
       },
       {
@@ -658,7 +634,6 @@ window.QUESTIONS = [
         "q": "Merge two arrays and remove duplicate elements.",
         "code": "const arr1 = [1, 2, 3, 7, 8];\nconst arr2 = [1, 4, 5, 9, 10];\n\n// Expected output:\n// [1, 2, 3, 4, 5, 7, 8, 9, 10]",
         "group": "JavaScript coding",
-        "top": true,
         "a": "```js\nconst arr1 = [1, 2, 3, 7, 8];\nconst arr2 = [1, 4, 5, 9, 10];\n\nconst merged = [...new Set([...arr1, ...arr2])].sort((a, b) => a - b);\n// [1, 2, 3, 4, 5, 7, 8, 9, 10]\n\n// without Set\nconst merged2 = arr1.concat(arr2)\n  .filter((x, i, all) => all.indexOf(x) === i)   // O(n²)\n  .sort((a, b) => a - b);\n```\nNote `sort()` without a comparator sorts as strings (`[10, 9]` → `[10, 9]` wrong order), so always pass `(a, b) => a - b` for numbers. If both arrays are already sorted, a two-pointer merge is O(n + m)."
       },
       {
@@ -681,7 +656,6 @@ window.QUESTIONS = [
         "n": 101,
         "q": "Implement debounce from scratch.",
         "group": "JavaScript coding",
-        "top": true,
         "a": "```js\nfunction debounce(fn, delay = 300) {\n  let timer;\n  function debounced(...args) {\n    clearTimeout(timer);\n    timer = setTimeout(() => fn.apply(this, args), delay);\n  }\n  debounced.cancel = () => clearTimeout(timer);\n  return debounced;\n}\n\nconst input = document.querySelector('#search');\ninput.addEventListener('input', debounce(e => search(e.target.value), 400));\n```\nExplain: closure keeps `timer`; each call resets it; `fn` runs only after `delay` ms of silence; `apply(this, args)` preserves context and arguments."
       },
       {
@@ -823,7 +797,6 @@ window.QUESTIONS = [
         "id": "114",
         "n": 114,
         "q": "Suppose you have three APIs, and API 2 depends on the successful response of API 1. How would you implement this?",
-        "top": true,
         "a": "Run them **sequentially** where there's a dependency, using `async/await` (and parallelize anything independent):\n```js\nasync function loadDashboard() {\n  try {\n    setLoading(true);\n    const user = await api.getUser();                 // API 1\n    const orders = await api.getOrders(user.id);      // API 2 needs API 1's result\n    const recommendations = await api.getRecs(orders[0]?.id); // API 3\n    setData({ user, orders, recommendations });\n  } catch (err) {\n    setError(err);            // any failure stops the chain\n  } finally {\n    setLoading(false);\n  }\n}\n```\nIf API 3 only depends on API 1, run 2 and 3 together: `await Promise.all([getOrders(user.id), getRecs(user.id)])`.\nWith RTK Query/React Query: use the `skip` / `enabled` option — `useGetOrdersQuery(user?.id, { skip: !user })`. Also cancel with AbortController if the component unmounts."
       },
       {
@@ -890,7 +863,6 @@ window.QUESTIONS = [
         "id": "125",
         "n": 125,
         "q": "How do you handle race conditions when multiple API calls update the same component?",
-        "top": true,
         "a": "A race condition happens when an older, slower response arrives after a newer one and overwrites it (e.g. typing \"re\" then \"react\" — \"re\" results show last).\nFixes:\n- **Abort** the previous request on change (AbortController in effect cleanup).\n- **Ignore stale responses** with a flag or request id:\n```jsx\nuseEffect(() => {\n  let ignore = false;\n  search(query).then(res => { if (!ignore) setResults(res); });\n  return () => { ignore = true; };\n}, [query]);\n```\n- Libraries: RTK Query/React Query (keyed by query), redux-saga `takeLatest`, RxJS `switchMap`.\n- For mutations, use optimistic updates with rollback and server versions/timestamps."
       }
     ]
@@ -962,7 +934,6 @@ window.QUESTIONS = [
         "id": "136",
         "n": 136,
         "q": "How do you debug a React application with high CPU utilization?",
-        "top": true,
         "a": "1. **Reproduce** and open Chrome DevTools **Performance** tab — record, look for long tasks, which functions use the most scripting time (flame chart).\n2. **React DevTools Profiler** — find components re-rendering too often or taking long, and why.\n3. Common culprits: infinite re-render loops (effect setting state it depends on), unthrottled scroll/resize/mousemove handlers, `setInterval` without cleanup, huge lists without virtualization, heavy computations every render, animations via JS instead of CSS, polling too frequently, memory leaks causing GC pressure.\n4. Fix: memoize, throttle/debounce, virtualize, move heavy work to a Web Worker, use `useTransition`/`useDeferredValue`, clean up effects.\n5. Verify with the profiler again and add monitoring."
       },
       {

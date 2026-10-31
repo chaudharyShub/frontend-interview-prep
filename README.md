@@ -46,13 +46,13 @@ The recommended way to use it:
 | 10 | TypeScript & Next.js | 10 |
 | 11 | Senior-level follow-ups | 6 |
 
-28 questions are marked **★ Priority** – the ones that come up most often.
+Star any question (☆) to build your own review list.
 
 ## Features
 
 - **Progress tracking** – ticks are saved in your browser (`localStorage`); no account needed.
 - **Search** questions *and* answers. Press <kbd>/</kbd> to jump to search, <kbd>Esc</kbd> to clear.
-- **Filters** – All, Remaining, Done and Priority.
+- **Filters** – All, Remaining, Done and Starred.
 - **Topic sidebar** with per-topic progress and the current topic highlighted.
 - **Light and dark themes**, following your system setting by default.
 - **Copy buttons** on code examples.
@@ -94,12 +94,11 @@ All content lives in [`assets/js/questions.js`](assets/js/questions.js). Each to
   "id": "177",          // unique and stable – progress is saved against it
   "n": 21,              // number shown in the list
   "q": "What is ...?",  // the question
-  "a": "Answer text…",  // supports paragraphs, - lists, 1. lists, `code`, **bold** and ``` fences
-  "top": true           // optional: mark as ★ Priority
+  "a": "Answer text…"   // supports paragraphs, - lists, 1. lists, `code`, **bold** and ``` fences
 }
 ```
 
-Never change the `id` of an existing question, or people will lose their progress for it.
+Never change the `id` of an existing question, or people will lose their progress and stars for it.
 
 ## Contributing
 

@@ -7,6 +7,7 @@
   // Progress used to live under an older key; migrate it so existing visitors keep their ticks.
   const KEY = 'fip-progress-v1';
   const KEY_CLOSED = 'fip-closed-v1';
+  const KEY_STARRED = 'fip-starred-v1';
   const KEY_THEME = 'fip-theme';
   const LEGACY_KEY = 'infosys-react-checklist-v1';
 
@@ -36,8 +37,10 @@
 
   const state = store.get(KEY, {});
   const closed = new Set(store.get(KEY_CLOSED, []));
+  const starred = new Set(store.get(KEY_STARRED, []));
   const save = () => store.set(KEY, state);
   const saveClosed = () => store.set(KEY_CLOSED, [...closed]);
+  const saveStarred = () => store.set(KEY_STARRED, [...starred]);
 
   // ---------- Helpers ----------
   const $ = (sel, root = document) => root.querySelector(sel);
@@ -45,6 +48,7 @@
   const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
   const CHEV = '<svg class="chev" viewBox="0 0 20 20" width="18" height="18" aria-hidden="true"><path d="m5 7.5 5 5 5-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  const STAR = '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="m12 3 2.7 5.6 6.1.8-4.5 4.2 1.1 6.1L12 16.8l-5.4 2.9 1.1-6.1-4.5-4.2 6.1-.8Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>';
   const CHEV_SM = '<svg class="chev-sm" viewBox="0 0 20 20" width="14" height="14" aria-hidden="true"><path d="m5 7.5 5 5 5-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 
   // Minimal Markdown: paragraphs, - / 1. lists, `code`, **bold**, ``` fenced blocks.
@@ -84,7 +88,7 @@
   const toc = $('#toc');
   const ANSWERS = {};
   const CODE = {};
-  let totalQuestions = 0, priorityCount = 0;
+  let totalQuestions = 0;
 
   DATA.forEach((sec, si) => {
     const sid = `topic-${si + 1}`;
@@ -103,7 +107,6 @@
     let group = null, open = false;
     sec.items.forEach(it => {
       totalQuestions++;
-      if (it.top) priorityCount++;
       if (it.a) ANSWERS[it.id] = it.a;
       if (it.code) CODE[it.id] = it.code;
 
@@ -114,16 +117,18 @@
       } else if (!open) { html += '<ul class="qlist">'; open = true; }
 
       const cid = `q-${esc(it.id)}`;
-      const badges = (it.top ? '<span class="badge badge-star">★ Priority</span>' : '');
       const search = plain(it.q + ' ' + (it.note || '') + ' ' + (it.a || '') + ' ' + (it.code || ''));
 
-      html += `<li class="qitem" data-id="${esc(it.id)}" data-text="${esc(search)}"${it.top ? ' data-top="1"' : ''}>
-        <label class="qrow" for="${cid}">
-          <input type="checkbox" class="check" id="${cid}">
-          <span class="qn">${esc(it.n)}</span>
-          <span class="qbody"><span class="qt">${esc(it.q)}</span>${badges ? `<span class="badges">${badges}</span>` : ''}
-          ${it.note ? `<span class="note">${esc(it.note)}</span>` : ''}</span>
-        </label>
+      html += `<li class="qitem" data-id="${esc(it.id)}" data-text="${esc(search)}">
+        <div class="qline">
+          <label class="qrow" for="${cid}">
+            <input type="checkbox" class="check" id="${cid}">
+            <span class="qn">${esc(it.n)}</span>
+            <span class="qbody"><span class="qt">${esc(it.q)}</span>
+            ${it.note ? `<span class="note">${esc(it.note)}</span>` : ''}</span>
+          </label>
+          <button type="button" class="starbtn" aria-pressed="false" aria-label="Star question ${esc(it.n)} for review" title="Star for review">${STAR}</button>
+        </div>
         ${it.code || it.a ? `<div class="more"><div class="more-btns">
           ${it.code ? `<button type="button" class="linkbtn codebtn" aria-expanded="false">Show code ${CHEV_SM}</button>` : ''}
           ${it.a ? `<button type="button" class="linkbtn ansbtn" aria-expanded="false">Show answer ${CHEV_SM}</button>` : ''}
@@ -143,7 +148,6 @@
 
   $('#statTotal').textContent = totalQuestions;
   $('#statSections').textContent = DATA.length;
-  $('#statPriority').textContent = priorityCount;
 
   const allItems = $$('.qitem');
   const sections = $$('.section');
@@ -180,6 +184,14 @@
     });
     const cbtn = $('.codebtn', li);
     if (cbtn) cbtn.addEventListener('click', () => setCode(li, $('.qcode', li).classList.contains('hidden')));
+    const sbtn = $('.starbtn', li);
+    const setStar = on => { li.classList.toggle('starred', on); sbtn.setAttribute('aria-pressed', String(on)); };
+    setStar(starred.has(li.dataset.id));
+    sbtn.addEventListener('click', () => {
+      const on = !starred.has(li.dataset.id);
+      on ? starred.add(li.dataset.id) : starred.delete(li.dataset.id);
+      setStar(on); saveStarred(); refresh();
+    });
     const abtn = $('.ansbtn', li);
     if (abtn) abtn.addEventListener('click', () => setAnswer(li, $('.answer', li).classList.contains('hidden')));
   });
@@ -259,7 +271,7 @@
       items.forEach(li => {
         const c = $('.check', li).checked;
         const show = (!term || li.dataset.text.includes(term)) &&
-          (filter === 'all' || (filter === 'done' && c) || (filter === 'todo' && !c) || (filter === 'top' && li.dataset.top));
+          (filter === 'all' || (filter === 'done' && c) || (filter === 'todo' && !c) || (filter === 'star' && li.classList.contains('starred')));
         li.classList.toggle('hidden', !show);
         if (show) vis++;
       });
@@ -279,6 +291,10 @@
     $('#statDone').textContent = `${done} of ${total} done`;
     $('#ovbar').style.width = (total ? 100 * done / total : 0) + '%';
     $('#ovbarWrap').setAttribute('aria-valuenow', String(pct));
+    $('#statStarred').textContent = starred.size;
+    const noStars = filter === 'star' && !starred.size && !term;
+    $('#emptyTitle').textContent = noStars ? 'No starred questions yet' : 'No questions match';
+    $('#emptyHint').textContent = noStars ? 'Tap the ☆ next to any question to save it for review.' : 'Try a different search term or filter.';
     $('#empty').classList.toggle('hidden', anyVisible);
     $('#resultCount').textContent = term || filter !== 'all'
       ? `Showing ${matches} of ${total} questions` : '';

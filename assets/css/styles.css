@@ -362,12 +362,17 @@ button { font: inherit; color: inherit; }
 .qbody { flex: 1; min-width: 0; }
 .qt { font-weight: 500; }
 .qitem.done .qt { color: var(--muted); text-decoration: line-through; text-decoration-color: color-mix(in srgb, var(--muted) 50%, transparent); }
-.badges { display: inline-flex; gap: 6px; margin-left: 8px; vertical-align: 1px; }
-.badge {
-  display: inline-block; font-size: 11px; font-weight: 600; line-height: 1;
-  padding: 4px 8px; border-radius: 99px; white-space: nowrap;
+.qline { display: flex; align-items: flex-start; }
+.qline .qrow { flex: 1; min-width: 0; }
+.starbtn {
+  flex: none; display: grid; place-items: center; width: 36px; height: 36px; margin: 6px 8px 0 0;
+  border: 0; border-radius: 8px; background: none; color: var(--muted); cursor: pointer;
+  opacity: .55; transition: opacity .15s, color .15s, background .15s;
 }
-.badge-star { background: var(--star-soft); color: var(--star); }
+.starbtn svg { fill: none; }
+.starbtn:hover, .starbtn:focus-visible { opacity: 1; background: var(--surface-2); }
+.qitem.starred .starbtn { opacity: 1; color: var(--star); }
+.qitem.starred .starbtn svg { fill: currentColor; }
 .note { display: block; margin-top: 4px; color: var(--muted); font-size: 13.5px; }
 
 .more { padding: 0 18px 14px 80px; margin-top: -6px; }
@@ -441,7 +446,7 @@ pre code { font-variant-ligatures: none; background: none; color: inherit; paddi
 }
 
 @media print {
-  .nav, .sidebar, .toolbar, .footer, .more-btns, .copy { display: none !important; }
+  .nav, .sidebar, .toolbar, .footer, .more-btns, .copy, .starbtn { display: none !important; }
   .layout { display: block; }
   .section { box-shadow: none; break-inside: avoid-page; }
 }

@@ -52,11 +52,11 @@
     <div class="container">
       <p class="eyebrow">React · JavaScript · Architecture</p>
       <h1>Frontend interview questions,<br class="br-md"> answered and tracked.</h1>
-      <p class="lead">A focused checklist for mid- to senior-level frontend roles. Answer each question out loud first, then reveal the model answer to check yourself. Tick it off once you can explain it with confidence.</p>
+      <p class="lead">A focused checklist for mid- to senior-level frontend roles. Answer each question out loud first, then reveal the model answer to check yourself. Tick it off once you can explain it with confidence, or star it to come back to later.</p>
       <div class="stats" id="stats">
         <div class="stat"><span class="stat-num" id="statTotal">–</span><span class="stat-label">Questions</span></div>
         <div class="stat"><span class="stat-num" id="statSections">–</span><span class="stat-label">Topics</span></div>
-        <div class="stat"><span class="stat-num" id="statPriority">–</span><span class="stat-label">Priority</span></div>
+        <div class="stat"><span class="stat-num" id="statStarred">0</span><span class="stat-label">Starred</span></div>
         <div class="stat stat-progress">
           <div class="stat-row"><span class="stat-num" id="statPct">0%</span><span class="stat-label" id="statDone">0 of 0 done</span></div>
           <div class="bar" role="progressbar" aria-label="Overall progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="ovbarWrap"><div class="bar-fill" id="ovbar"></div></div>
@@ -85,7 +85,7 @@
             <button type="button" data-f="all" class="on" aria-pressed="true">All</button>
             <button type="button" data-f="todo" aria-pressed="false">Remaining</button>
             <button type="button" data-f="done" aria-pressed="false">Done</button>
-            <button type="button" data-f="top" aria-pressed="false">★ Priority</button>
+            <button type="button" data-f="star" aria-pressed="false">★ Starred</button>
           </div>
           <div class="actions">
             <button type="button" class="btn" id="toggleAnswers">Show all answers</button>
@@ -98,8 +98,8 @@
 
       <div id="list"></div>
       <div class="empty hidden" id="empty">
-        <p class="empty-title">No questions match</p>
-        <p>Try a different search term or filter.</p>
+        <p class="empty-title" id="emptyTitle">No questions match</p>
+        <p id="emptyHint">Try a different search term or filter.</p>
       </div>
     </main>
   </div>
