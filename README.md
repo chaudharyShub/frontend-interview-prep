@@ -4,7 +4,7 @@
 
 # Frontend Interview Prep
 
-**176 frontend interview questions with clear answers. Practise, check yourself and track your progress.**
+**176 frontend interview questions with clear answers. Practise, check yourself, track your progress and star questions to review later.**
 
 [**Open the live app →**](https://frontend-interview-prod.vercel.app)
 
@@ -29,6 +29,7 @@ The recommended way to use it:
 1. Read a question and answer it **out loud** first.
 2. Open **Show answer** and compare.
 3. Tick the question once you can explain it confidently.
+4. Not there yet? **Star** it (☆) and come back to it later using the **Starred** filter.
 
 ## What's covered
 
@@ -46,11 +47,10 @@ The recommended way to use it:
 | 10 | TypeScript & Next.js | 10 |
 | 11 | Senior-level follow-ups | 6 |
 
-Star any question (☆) to build your own review list.
-
 ## Features
 
 - **Progress tracking** – ticks are saved in your browser (`localStorage`); no account needed.
+- **Star for review** – star any question to build your own review list. Stars are saved too, and **Reset progress** keeps them.
 - **Search** questions *and* answers. Press <kbd>/</kbd> to jump to search, <kbd>Esc</kbd> to clear.
 - **Filters** – All, Remaining, Done and Starred.
 - **Topic sidebar** with per-topic progress and the current topic highlighted.
@@ -98,6 +98,14 @@ All content lives in [`assets/js/questions.js`](assets/js/questions.js). Each to
 }
 ```
 
+Optional fields:
+
+| Field | Purpose |
+|-------|---------|
+| `note` | Short hint shown under the question |
+| `code` | Code snippet shown with a **Show code** button |
+| `group` | Sub-heading inside a topic (e.g. "React machine coding") |
+
 Never change the `id` of an existing question, or people will lose their progress and stars for it.
 
 ## Contributing
@@ -107,6 +115,11 @@ Spotted a mistake or have a question worth adding? [Open an issue](https://githu
 ## Deployment
 
 The site is deployed on [Vercel](https://vercel.com). Every push to `main` goes live automatically; no build settings are needed.
+
+## More from the author
+
+- [Portfolio](https://shubhamworks.vercel.app/)
+- [AWS Cloud Practitioner practice exams](https://cloud-prep-aws.vercel.app/)
 
 ## License
 
