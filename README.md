@@ -64,8 +64,8 @@ The recommended way to use it:
 No install needed. Clone the repo and either open `index.html` directly or serve the folder:
 
 ```bash
-git clone https://github.com/chaudharyShub/frontend-interview-prep.git
-cd frontend-interview-prep
+git clone https://github.com/chaudharyShub/frontend-interview-prod.git
+cd frontend-interview-prod
 npx serve .            # or: python -m http.server
 ```
 
@@ -110,7 +110,7 @@ Never change the `id` of an existing question, or people will lose their progres
 
 ## Contributing
 
-Spotted a mistake or have a question worth adding? [Open an issue](https://github.com/chaudharyShub/frontend-interview-prep/issues/new) or send a pull request.
+Spotted a mistake or have a question worth adding? [Open an issue](https://github.com/chaudharyShub/frontend-interview-prod/issues/new) or send a pull request.
 
 ## Deployment
 
