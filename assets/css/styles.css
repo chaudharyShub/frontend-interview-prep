@@ -368,7 +368,6 @@ button { font: inherit; color: inherit; }
   padding: 4px 8px; border-radius: 99px; white-space: nowrap;
 }
 .badge-star { background: var(--star-soft); color: var(--star); }
-.badge-tag { background: var(--accent-soft); color: var(--accent-text); }
 .note { display: block; margin-top: 4px; color: var(--muted); font-size: 13.5px; }
 
 .more { padding: 0 18px 14px 80px; margin-top: -6px; }

@@ -114,8 +114,7 @@
       } else if (!open) { html += '<ul class="qlist">'; open = true; }
 
       const cid = `q-${esc(it.id)}`;
-      const badges = (it.top ? '<span class="badge badge-star">★ Priority</span>' : '') +
-        (it.tag ? `<span class="badge badge-tag">${esc(it.tag)}</span>` : '');
+      const badges = (it.top ? '<span class="badge badge-star">★ Priority</span>' : '');
       const search = plain(it.q + ' ' + (it.note || '') + ' ' + (it.a || '') + ' ' + (it.code || ''));
 
       html += `<li class="qitem" data-id="${esc(it.id)}" data-text="${esc(search)}"${it.top ? ' data-top="1"' : ''}>

@@ -7,7 +7,6 @@
  *   q     – question text
  *   a     – answer (light Markdown: paragraphs, - lists, 1. lists, `code`, **bold**, ``` fences)
  *   top   – optional, true for priority questions
- *   tag   – optional difficulty label
  *   note  – optional hint shown under the question
  *   code  – optional code snippet shown with the question
  *   group – optional sub-heading inside a section
@@ -753,7 +752,6 @@ window.QUESTIONS = [
         "id": "m1",
         "n": "M1",
         "q": "Create a counter with increment, decrement and reset",
-        "tag": "Easy",
         "group": "React machine coding",
         "note": "",
         "a": "```jsx\nimport { useState } from 'react';\n\nexport default function Counter({ initial = 0, step = 1 }) {\n  const [count, setCount] = useState(initial);\n  return (\n    <div>\n      <h2>{count}</h2>\n      <button onClick={() => setCount(c => c - step)} disabled={count <= 0}>-</button>\n      <button onClick={() => setCount(c => c + step)}>+</button>\n      <button onClick={() => setCount(initial)}>Reset</button>\n    </div>\n  );\n}\n```\nTalking points: functional updates (avoid stale state), optional min limit, props for initial/step. Follow-ups: move logic into a `useCounter` hook, or use `useReducer`."
@@ -762,7 +760,6 @@ window.QUESTIONS = [
         "id": "m2",
         "n": "M2",
         "q": "Fetch users from an API and display usernames",
-        "tag": "Easy",
         "group": "React machine coding",
         "note": "Include: loading state, error handling, empty state, response handling, cleanup, correct dependencies.",
         "a": "```jsx\nimport { useEffect, useState } from 'react';\n\nexport default function UserList() {\n  const [users, setUsers] = useState([]);\n  const [loading, setLoading] = useState(true);\n  const [error, setError] = useState(null);\n\n  useEffect(() => {\n    const controller = new AbortController();\n    fetch('https://jsonplaceholder.typicode.com/users', { signal: controller.signal })\n      .then(res => { if (!res.ok) throw new Error(`HTTP ${res.status}`); return res.json(); })\n      .then(setUsers)\n      .catch(err => { if (err.name !== 'AbortError') setError(err.message); })\n      .finally(() => setLoading(false));\n    return () => controller.abort();\n  }, []);\n\n  if (loading) return <p>Loading…</p>;\n  if (error) return <p role=\"alert\">Error: {error}</p>;\n  if (!users.length) return <p>No users found.</p>;\n  return <ul>{users.map(u => <li key={u.id}>{u.username}</li>)}</ul>;\n}\n```\nNote: `fetch` doesn't reject on 404/500, so check `res.ok`."
@@ -771,7 +768,6 @@ window.QUESTIONS = [
         "id": "m3",
         "n": "M3",
         "q": "Create a searchable and filterable list",
-        "tag": "Medium",
         "group": "React machine coding",
         "note": "",
         "a": "```jsx\nimport { useMemo, useState } from 'react';\n\nexport default function SearchableList({ items }) {   // items: [{id, name, category}]\n  const [query, setQuery] = useState('');\n  const [category, setCategory] = useState('all');\n  const categories = useMemo(() => ['all', ...new Set(items.map(i => i.category))], [items]);\n\n  const visible = useMemo(() => {\n    const q = query.trim().toLowerCase();\n    return items.filter(i =>\n      (category === 'all' || i.category === category) &&\n      i.name.toLowerCase().includes(q));\n  }, [items, query, category]);\n\n  return (\n    <div>\n      <input value={query} onChange={e => setQuery(e.target.value)} placeholder=\"Search…\" />\n      <select value={category} onChange={e => setCategory(e.target.value)}>\n        {categories.map(c => <option key={c} value={c}>{c}</option>)}\n      </select>\n      {visible.length ? (\n        <ul>{visible.map(i => <li key={i.id}>{i.name}</li>)}</ul>\n      ) : <p>No results</p>}\n    </div>\n  );\n}\n```\nTalking points: filtered list is **derived** (not stored in state), `useMemo` for big lists, debounce the query (or `useDeferredValue`) if filtering is slow or done via API."
@@ -780,7 +776,6 @@ window.QUESTIONS = [
         "id": "m4",
         "n": "M4",
         "q": "Create an N × N dynamic grid based on user input",
-        "tag": "Medium",
         "group": "React machine coding",
         "note": "",
         "a": "```jsx\nimport { useState } from 'react';\n\nexport default function Grid() {\n  const [n, setN] = useState(3);\n  const [active, setActive] = useState(new Set());\n\n  const toggle = i => setActive(prev => {\n    const next = new Set(prev);\n    next.has(i) ? next.delete(i) : next.add(i);\n    return next;\n  });\n\n  return (\n    <div>\n      <input type=\"number\" min=\"1\" max=\"20\" value={n}\n        onChange={e => { setN(Math.max(1, Math.min(20, +e.target.value || 1))); setActive(new Set()); }} />\n      <div style={{ display: 'grid', gridTemplateColumns: `repeat(${n}, 40px)`, gap: 4 }}>\n        {Array.from({ length: n * n }, (_, i) => (\n          <div key={i} onClick={() => toggle(i)}\n            style={{ width: 40, height: 40, border: '1px solid #999',\n                     background: active.has(i) ? 'teal' : 'white' }} />\n        ))}\n      </div>\n    </div>\n  );\n}\n```\nTalking points: CSS grid with `repeat(n, …)`, validate input, immutable Set update, row = `Math.floor(i / n)`, col = `i % n`. Common follow-ups: click order then un-color in reverse, tic-tac-toe winner check."
@@ -789,7 +784,6 @@ window.QUESTIONS = [
         "id": "m5",
         "n": "M5",
         "q": "Create pagination for an API-based product listing",
-        "tag": "Medium",
         "group": "React machine coding",
         "note": "Include: loading state, error handling, empty state, response handling, cleanup, correct dependencies.",
         "a": "```jsx\nimport { useEffect, useState } from 'react';\nconst PAGE_SIZE = 10;\n\nexport default function ProductList() {\n  const [page, setPage] = useState(1);\n  const [data, setData] = useState({ products: [], total: 0 });\n  const [loading, setLoading] = useState(false);\n  const [error, setError] = useState(null);\n\n  useEffect(() => {\n    const controller = new AbortController();\n    setLoading(true); setError(null);\n    const skip = (page - 1) * PAGE_SIZE;\n    fetch(`https://dummyjson.com/products?limit=${PAGE_SIZE}&skip=${skip}`, { signal: controller.signal })\n      .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })\n      .then(d => setData({ products: d.products, total: d.total }))\n      .catch(e => e.name !== 'AbortError' && setError(e.message))\n      .finally(() => setLoading(false));\n    return () => controller.abort();   // cancels the old request if page changes fast\n  }, [page]);\n\n  const totalPages = Math.ceil(data.total / PAGE_SIZE);\n  if (error) return <p>Error: {error}</p>;\n  return (\n    <div>\n      {loading ? <p>Loading…</p> : (\n        <ul>{data.products.map(p => <li key={p.id}>{p.title} – ${p.price}</li>)}</ul>\n      )}\n      <button disabled={page === 1} onClick={() => setPage(p => p - 1)}>Prev</button>\n      <span> Page {page} of {totalPages} </span>\n      <button disabled={page >= totalPages} onClick={() => setPage(p => p + 1)}>Next</button>\n    </div>\n  );\n}\n```\nExtras to mention: keep `page` in the URL (`useSearchParams`), cache pages, page-number buttons, abort to avoid race conditions."
@@ -798,7 +792,6 @@ window.QUESTIONS = [
         "id": "m6",
         "n": "M6",
         "q": "Build a reusable custom hook for API requests",
-        "tag": "Medium",
         "group": "React machine coding",
         "note": "Include: loading state, error handling, empty state, response handling, cleanup, correct dependencies.",
         "a": "```jsx\nimport { useCallback, useEffect, useRef, useState } from 'react';\n\nexport function useApi(url, options = {}, { immediate = true } = {}) {\n  const [data, setData] = useState(null);\n  const [loading, setLoading] = useState(immediate);\n  const [error, setError] = useState(null);\n  const optionsRef = useRef(options);\n  optionsRef.current = options;               // latest options without re-triggering\n  const controllerRef = useRef(null);\n\n  const execute = useCallback(async (overrideBody) => {\n    controllerRef.current?.abort();\n    const controller = new AbortController();\n    controllerRef.current = controller;\n    setLoading(true); setError(null);\n    try {\n      const { body, ...rest } = optionsRef.current;\n      const payload = overrideBody ?? body;\n      const res = await fetch(url, {\n        ...rest,\n        body: payload ? JSON.stringify(payload) : undefined,\n        headers: { 'Content-Type': 'application/json', ...rest.headers },\n        signal: controller.signal,\n      });\n      if (!res.ok) throw new Error(`HTTP ${res.status}`);\n      const json = await res.json();\n      setData(json);\n      return json;\n    } catch (e) {\n      if (e.name !== 'AbortError') setError(e);\n    } finally {\n      if (controllerRef.current === controller) setLoading(false);\n    }\n  }, [url]);\n\n  useEffect(() => {\n    if (immediate) execute();\n    return () => controllerRef.current?.abort();\n  }, [execute, immediate]);\n\n  return { data, loading, error, refetch: execute };\n}\n\n// const { data, loading, error, refetch } = useApi('/api/users');\n// const { refetch: save } = useApi('/api/users', { method: 'POST' }, { immediate: false });\n```\nTalking points: loading/error/data states, abort on unmount and on new request (race conditions), `refetch` for manual calls, stable options via ref. In production, RTK Query / React Query add caching, retries and de-duplication."
