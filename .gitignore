@@ -1,0 +1,16 @@
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editors
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.swp
+
+# Vercel
+.vercel
+
+# Node (if tooling is added later)
+node_modules/

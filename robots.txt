@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://frontend-interview-prod.vercel.app/sitemap.xml
