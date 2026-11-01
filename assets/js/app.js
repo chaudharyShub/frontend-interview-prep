@@ -384,4 +384,7 @@ ${message}`));
 
   updateToggleLabel();
   refresh();
+
+  // Shared helpers for the code editor (editor.js).
+  window.FIP = { $, esc, inline, store, confirmDialog };
 })();
