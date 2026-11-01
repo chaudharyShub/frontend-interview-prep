@@ -3,31 +3,31 @@
   "rewrites": [
     {
       "source": "/javascript",
-      "destination": "/index.html"
+      "destination": "/"
     },
     {
       "source": "/typescript",
-      "destination": "/index.html"
+      "destination": "/"
     },
     {
       "source": "/react",
-      "destination": "/index.html"
+      "destination": "/"
     },
     {
       "source": "/nextjs",
-      "destination": "/index.html"
+      "destination": "/"
     },
     {
       "source": "/html-css",
-      "destination": "/index.html"
+      "destination": "/"
     },
     {
       "source": "/system-design",
-      "destination": "/index.html"
+      "destination": "/"
     },
     {
       "source": "/starred",
-      "destination": "/index.html"
+      "destination": "/"
     }
   ]
 }

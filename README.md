@@ -6,9 +6,9 @@
 
 **180 frontend interview questions with clear answers. Practise, check yourself, track your progress and star questions to review later.**
 
-[**Open the live app →**](https://frontend-interview-prod.vercel.app)
+[**Open the live app →**](https://frontend-interview-prepare.vercel.app)
 
-[![Deployed on Vercel](https://img.shields.io/badge/deployed%20on-Vercel-000?logo=vercel&logoColor=white)](https://frontend-interview-prod.vercel.app)
+[![Deployed on Vercel](https://img.shields.io/badge/deployed%20on-Vercel-000?logo=vercel&logoColor=white)](https://frontend-interview-prepare.vercel.app)
 ![Questions](https://img.shields.io/badge/questions-180-4f46e5)
 ![No dependencies](https://img.shields.io/badge/dependencies-0-059669)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
