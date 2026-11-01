@@ -367,11 +367,13 @@
     const ed = { id, li, panel, ta, out, escaped: false, worker: null, timer: null, frame: null, ready: false, pending: false, watchdog: null, ping: null, lastPong: 0 };
     ed.primary = () => (react ? runReact(ed) : runJS(ed, 'check'));
 
-    ta.value = drafts[id] != null ? drafts[id] : ch.starter;
+    // An empty draft isn't worth keeping: show the starter code again.
+    const blank = v => !v || !v.trim();
+    ta.value = blank(drafts[id]) ? ch.starter : drafts[id];
     ta.addEventListener('keydown', e => onKey(e, ta, ed));
     ta.addEventListener('input', () => {
       autoSize(ta);
-      if (ta.value === ch.starter) delete drafts[id]; else drafts[id] = ta.value;
+      if (ta.value === ch.starter || blank(ta.value)) delete drafts[id]; else drafts[id] = ta.value;
       saveDrafts();
     });
     ta.addEventListener('blur', () => { ed.escaped = false; });
@@ -381,7 +383,8 @@
     if (checkBtn) checkBtn.addEventListener('click', () => runJS(ed, 'check'));
     $('.ed-reset', panel).addEventListener('click', async () => {
       if (ta.value === ch.starter) return;
-      const ok = await confirmDialog({
+      // Only ask when there is code to lose.
+      const ok = blank(ta.value) || await confirmDialog({
         title: 'Reset code?',
         message: 'This replaces your code for this question with the starter code.',
         confirmText: 'Reset code',
