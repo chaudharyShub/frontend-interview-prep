@@ -48,7 +48,20 @@
     send({ type: 'error', text });
     reportSize();
   }
-  window.addEventListener('error', e => { send({ type: 'error', text: e.message }); });
+  // The browser hides details of errors thrown from the user's code here ("Script error."),
+  // because this sandboxed page has an opaque origin. Event handlers and timer callbacks are
+  // wrapped below so the real message is reported; this is the fallback for anything else.
+  window.addEventListener('error', e => {
+    const hidden = !e.error && /^Script error\.?$/.test(e.message);
+    send({ type: 'error', text: hidden ? 'Your code threw an error (the browser hid the details). Open the browser console for more.' : e.message });
+  });
+  const guarded = fn => (typeof fn !== 'function' || fn.__fipWrapped) ? fn : Object.assign(function (...args) {
+    try { return fn.apply(this, args); } catch (e) { console.error(e); return undefined; }
+  }, { __fipWrapped: true });
+  ['setTimeout', 'setInterval', 'requestAnimationFrame', 'queueMicrotask'].forEach(name => {
+    const orig = window[name];
+    if (typeof orig === 'function') window[name] = (fn, ...rest) => orig.call(window, guarded(fn), ...rest);
+  });
   window.addEventListener('unhandledrejection', e => {
     const r = e.reason;
     send({ type: 'error', text: 'Unhandled promise rejection – ' + (r && r.message ? r.message : String(r)) });
@@ -64,23 +77,49 @@
   }
 
   // ---------- Compile & render ----------
-  const MODULES = { react: React, 'react-dom': ReactDOM, 'react-dom/client': ReactDOM };
+  // The user's code gets a React whose createElement wraps on* handlers (see `guarded`).
+  const UserReact = Object.assign({}, React, {
+    createElement(type, props, ...children) {
+      if (props) {
+        for (const k in props) {
+          if (/^on[A-Z]/.test(k) && typeof props[k] === 'function') {
+            props = Object.assign({}, props);
+            for (const h in props) if (/^on[A-Z]/.test(h)) props[h] = guarded(props[h]);
+            break;
+          }
+        }
+      }
+      return React.createElement(type, props, ...children);
+    },
+  });
+  const MODULES = { react: UserReact, 'react-dom': ReactDOM, 'react-dom/client': ReactDOM };
   function requireShim(name) {
     if (name in MODULES) return MODULES[name];
     throw new Error(`Can't import "${name}" here. Only react and react-dom are available.`);
+  }
+
+  // Loops that run for over a second in one go (render, click handler, effect…) throw.
+  const GUARD = '__loopGuard';
+  const loopGuard = LoopGuard.makeLoopGuard(1000);
+
+  // Tells the editor the tree has actually rendered (effects run after the commit).
+  function Committed() {
+    React.useLayoutEffect(() => { send({ type: 'rendered' }); }, []);
+    return null;
   }
 
   function render(code) {
     let compiled;
     try {
       compiled = Sucrase.transform(code, { transforms: ['jsx', 'imports'], production: true }).code;
+      compiled = LoopGuard.protectLoops(compiled, GUARD);
     } catch (e) {
       showError(`SyntaxError: ${e.message}`);
       return;
     }
     const module = { exports: {} };
     try {
-      new Function('require', 'module', 'exports', 'React', compiled)(requireShim, module, module.exports, React);
+      new Function('require', 'module', 'exports', 'React', GUARD, compiled)(requireShim, module, module.exports, UserReact, loopGuard);
     } catch (e) {
       showError(`${e.name}: ${e.message}`);
       return;
@@ -94,8 +133,9 @@
     if (root) root.unmount();
     rootEl.innerHTML = '';
     root = ReactDOM.createRoot(rootEl);
-    root.render(React.createElement(ErrorBoundary, null, React.createElement(Component)));
-    send({ type: 'rendered' });
+    root.render(React.createElement(React.Fragment, null,
+      React.createElement(ErrorBoundary, null, React.createElement(Component)),
+      React.createElement(Committed)));
   }
 
   // ---------- Size reporting so the editor can size the iframe ----------
@@ -109,6 +149,7 @@
   window.addEventListener('message', e => {
     if (e.source !== parentWin) return;
     const msg = e.data || {};
+    if (msg.type === 'ping') { send({ type: 'pong' }); return; }
     if (msg.type !== 'render') return;
     document.documentElement.dataset.theme = msg.theme === 'dark' ? 'dark' : 'light';
     render(String(msg.code || ''));

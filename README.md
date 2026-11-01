@@ -86,6 +86,7 @@ The code editor needs the folder served over http (opening `index.html` as a fil
 │   ├── js/editor.js        # Code editor UI (Try it / Run / Check)
 │   ├── js/runner.js        # Web Worker that runs JS code and tests (2 s timeout)
 │   ├── js/preview.js       # React preview: compiles JSX and renders it
+│   ├── js/loop-guard.js    # Adds infinite-loop checks to React preview code
 │   ├── css/preview.css     # Styles inside the React preview
 │   ├── vendor/             # React, ReactDOM and Sucrase (copied in, loaded only by the preview)
 │   ├── favicon.svg
@@ -143,6 +144,7 @@ Results are compared deeply, so object key order doesn't matter. For polyfills a
 
 - **JavaScript** runs in a fresh Web Worker for every run, stopped after 2 seconds, with no network access. Only `runner.js` is allowed to use `new Function` (see `vercel.json`); the main page keeps a strict security policy.
 - **React** code runs in `react-preview.html` inside a sandboxed iframe, so it can't read the page or your saved progress. JSX is compiled by [Sucrase](https://github.com/alangpierce/sucrase).
+- **Infinite loops in React code:** after compiling, every `while`, `do…while` and `for(;;)` loop gets a time check (`loop-guard.js`). A loop that runs for over 1 second in one go (a render, a click handler, an effect) throws an error that is shown in the preview. If the preview still stops responding, the editor shuts the frame down after 3 seconds.
 
 ## Contributing
 

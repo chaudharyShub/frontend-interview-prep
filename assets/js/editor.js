@@ -244,20 +244,52 @@
   }
 
   // ---------- React preview ----------
+  // The preview runs its own loop guard (loop-guard.js). As a backup, if the frame stops
+  // answering (no "rendered" after a render, or no reply to a ping), it is removed.
+  const RENDER_TIMEOUT_MS = 3000;
+  const PING_EVERY_MS = 2000;
   const frames = new Map(); // iframe window → editor
   window.addEventListener('message', e => {
     const ed = frames.get(e.source);
     const m = e.data;
     if (!ed || !m || m.source !== 'fip-preview') return;
-    if (m.type === 'ready') { ed.ready = true; if (ed.pending) { ed.pending = false; sendRender(ed); } }
+    if (m.type === 'ready') { ed.ready = true; startPing(ed); if (ed.pending) { ed.pending = false; sendRender(ed); } }
+    else if (m.type === 'rendered') clearTimeout(ed.watchdog);
+    else if (m.type === 'pong') ed.lastPong = Date.now();
     else if (m.type === 'log') ed.out.log(m.level, m.text);
-    else if (m.type === 'error') ed.out.error(m.text);
+    else if (m.type === 'error') { clearTimeout(ed.watchdog); ed.out.error(m.text); }
     else if (m.type === 'size') ed.frame.style.height = Math.min(Math.max(m.height, 80), 640) + 'px';
   });
 
   function sendRender(ed) {
     ed.out.clear();
+    clearTimeout(ed.watchdog);
+    ed.watchdog = setTimeout(() => killFrame(ed), RENDER_TIMEOUT_MS);
     ed.frame.contentWindow.postMessage({ type: 'render', code: ed.ta.value, theme: theme() }, '*');
+  }
+
+  function startPing(ed) {
+    clearInterval(ed.ping);
+    ed.lastPong = Date.now();
+    ed.ping = setInterval(() => {
+      if (!ed.frame) return clearInterval(ed.ping);
+      if (ed.panel.classList.contains('hidden')) { ed.lastPong = Date.now(); return; }
+      if (Date.now() - ed.lastPong > PING_EVERY_MS + RENDER_TIMEOUT_MS) return killFrame(ed);
+      ed.frame.contentWindow.postMessage({ type: 'ping' }, '*');
+    }, PING_EVERY_MS);
+  }
+
+  function killFrame(ed) {
+    if (!ed.frame) return;
+    clearTimeout(ed.watchdog);
+    clearInterval(ed.ping);
+    frames.delete(ed.frame.contentWindow);
+    ed.frame.remove();
+    ed.frame = null;
+    ed.ready = false;
+    ed.pending = false;
+    ed.panel.querySelector('.ed-preview-wrap').classList.add('hidden');
+    ed.out.error('The preview stopped responding, so it was shut down. Is there an infinite loop? Fix the code and press Run preview again.');
   }
 
   function runReact(ed) {
@@ -273,6 +305,7 @@
       ed.frame = f;
       frames.set(f.contentWindow, ed);
       ed.pending = true;
+      ed.out.clear();
       return;
     }
     if (ed.ready) sendRender(ed); else ed.pending = true;
@@ -303,7 +336,7 @@
     const ta = $('.ed-code', panel);
     const box = $('.ed-out', panel);
     const out = makeOutput(box);
-    const ed = { id, li, panel, ta, out, escaped: false, worker: null, timer: null, frame: null, ready: false, pending: false };
+    const ed = { id, li, panel, ta, out, escaped: false, worker: null, timer: null, frame: null, ready: false, pending: false, watchdog: null, ping: null, lastPong: 0 };
     ed.primary = () => (react ? runReact(ed) : runJS(ed, 'check'));
 
     ta.value = drafts[id] != null ? drafts[id] : ch.starter;
