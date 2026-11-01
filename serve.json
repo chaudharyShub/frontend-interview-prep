@@ -1,0 +1,33 @@
+{
+  "cleanUrls": true,
+  "rewrites": [
+    {
+      "source": "/javascript",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/typescript",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/react",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/nextjs",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/html-css",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/system-design",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/starred",
+      "destination": "/index.html"
+    }
+  ]
+}

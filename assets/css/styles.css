@@ -133,7 +133,24 @@ button { font: inherit; color: inherit; }
 .brand { display: flex; align-items: center; gap: 10px; color: var(--text); font-weight: 650; letter-spacing: -0.01em; }
 .brand:hover { text-decoration: none; }
 .brand img { border-radius: 7px; }
-.nav-actions { display: flex; gap: 6px; }
+.nav-actions { display: flex; gap: 6px; flex: none; }
+
+/* Track links in the header. On small screens they scroll sideways and the brand shrinks to its icon. */
+.nav-inner { gap: 16px; }
+.brand { flex: none; }
+.track-nav {
+  flex: 1; min-width: 0; display: flex; gap: 2px; justify-content: center;
+  overflow-x: auto; scrollbar-width: none; -webkit-mask-image: linear-gradient(90deg, #000 92%, transparent);
+  mask-image: linear-gradient(90deg, #000 92%, transparent);
+}
+.track-nav::-webkit-scrollbar { display: none; }
+.track-nav a {
+  flex: none; padding: 6px 10px; border-radius: 8px;
+  color: var(--text-2); font-size: 13.5px; font-weight: 500; white-space: nowrap;
+}
+.track-nav a:hover { background: var(--surface-2); color: var(--text); text-decoration: none; }
+.track-nav a[aria-current="page"] { background: var(--accent-soft); color: var(--accent-text); }
+@media (max-width: 1100px) { .brand span { display: none; } .track-nav { justify-content: flex-start; } }
 
 .icon-btn {
   display: inline-grid; place-items: center;
@@ -159,6 +176,18 @@ button { font: inherit; color: inherit; }
     radial-gradient(900px 300px at 10% -10%, color-mix(in srgb, var(--accent) 14%, transparent), transparent 70%),
     radial-gradient(700px 260px at 90% 0%, color-mix(in srgb, var(--accent-2) 10%, transparent), transparent 70%);
 }
+.breadcrumb { margin: 0 0 14px; font-size: 13.5px; }
+.breadcrumb ol { display: flex; flex-wrap: wrap; align-items: center; list-style: none; margin: 0; padding: 0; }
+.breadcrumb li { display: inline-flex; align-items: center; }
+.breadcrumb li + li::before {
+  content: ""; width: 6px; height: 6px; margin: 0 10px;
+  border-right: 1.5px solid var(--muted); border-top: 1.5px solid var(--muted);
+  transform: rotate(45deg); opacity: .7;
+}
+.breadcrumb a { color: var(--text-2); font-weight: 500; }
+.breadcrumb a:hover { color: var(--accent-text); }
+.breadcrumb [aria-current="page"] { color: var(--accent-text); font-weight: 600; }
+
 .eyebrow {
   display: inline-block; margin: 0 0 14px;
   font-size: 12.5px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase;
@@ -191,6 +220,77 @@ button { font: inherit; color: inherit; }
   .stats { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .stat-progress { grid-column: 1 / -1; }
 }
+
+/* ---------- Track tabs (Theory / Coding) ---------- */
+
+.tabs { display: flex; gap: 6px; margin-top: 20px; flex-wrap: wrap; }
+.tab {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 8px 16px; border-radius: 10px;
+  border: 1px solid var(--line); background: var(--surface); color: var(--text-2);
+  font-weight: 600; font-size: 14.5px; box-shadow: var(--shadow-sm);
+}
+.tab:hover { color: var(--text); border-color: var(--line-strong); text-decoration: none; }
+.tab.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+.tab-count { font-size: 12.5px; font-weight: 500; opacity: .8; font-variant-numeric: tabular-nums; }
+
+/* ---------- Home ---------- */
+
+.home { padding-top: 8px; padding-bottom: 64px; }
+.home-search { max-width: 720px; }
+.home-h { margin: 28px 0 12px; font-size: 13px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+
+.continue {
+  display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 16px;
+  margin-top: 20px; padding: 14px 18px; border-radius: var(--radius);
+  background: var(--accent-soft); border: 1px solid color-mix(in srgb, var(--accent) 30%, var(--line));
+  color: var(--accent-text);
+}
+.continue:hover { text-decoration: none; border-color: var(--accent); }
+.continue-label { font-size: 13px; color: var(--text-2); }
+.continue-where { font-weight: 650; }
+
+.track-grid { display: grid; gap: 14px; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }
+.track-card {
+  display: flex; flex-direction: column; gap: 8px;
+  padding: 18px; border-radius: var(--radius);
+  background: var(--surface); border: 1px solid var(--line); box-shadow: var(--shadow);
+  color: var(--text); transition: border-color .15s, transform .15s;
+}
+a.track-card:hover { text-decoration: none; border-color: color-mix(in srgb, var(--accent) 45%, var(--line)); transform: translateY(-1px); }
+.track-card h3 { margin: 0; font-size: 17px; font-weight: 650; letter-spacing: -0.01em; }
+.track-card p { margin: 0; color: var(--text-2); font-size: 14px; }
+.track-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.track-stars { font-size: 13px; color: var(--star); font-weight: 600; white-space: nowrap; }
+.track-tabs { color: var(--muted) !important; font-size: 13px !important; margin-top: auto !important; padding-top: 4px; }
+.track-progress { display: flex; align-items: center; gap: 10px; }
+.track-progress .bar { flex: 1; }
+.track-done { font-size: 12.5px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.track-card.complete .track-done { color: var(--done); font-weight: 600; }
+.track-card.soon { background: var(--surface-2); box-shadow: none; border-style: dashed; }
+.badge {
+  font-size: 11.5px; font-weight: 600; padding: 2px 8px; border-radius: 99px; white-space: nowrap;
+  background: var(--surface); border: 1px solid var(--line); color: var(--muted);
+}
+.home-foot { display: flex; flex-wrap: wrap; gap: 8px; justify-content: space-between; margin-top: 24px; }
+.home-foot .btn:hover { text-decoration: none; }
+
+.gresults { margin-top: 16px; }
+.gresults .result-count { margin-bottom: 4px; }
+.gr-track { margin: 18px 0 6px; font-size: 13px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+.gr-list { list-style: none; margin: 0; padding: 0; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; }
+.gr-list li + li { border-top: 1px solid var(--line); }
+.gr-list a { display: flex; flex-direction: column; gap: 2px; padding: 12px 16px; color: var(--text); }
+.gr-list a:hover { background: var(--surface-2); text-decoration: none; }
+.gr-q { font-weight: 500; }
+.gr-meta { font-size: 12.5px; color: var(--muted); }
+.gr-done { color: var(--done); }
+.gr-star { color: var(--star); }
+.gr-empty { color: var(--muted); padding: 24px 0; }
+
+/* Highlight a question opened from a link (e.g. home search). */
+.qitem.flash { animation: flash 2s ease-out; }
+@keyframes flash { 0%, 30% { background: var(--accent-soft); } 100% { background: transparent; } }
 
 /* ---------- Progress bars ---------- */
 

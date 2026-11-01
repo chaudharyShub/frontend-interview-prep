@@ -29,31 +29,29 @@ The recommended way to use it:
 1. Read a question and answer it **out loud** first.
 2. Open **Show answer** and compare.
 3. Tick the question once you can explain it confidently.
-4. Not there yet? **Star** it (☆) and come back to it later using the **Starred** filter.
+4. Not there yet? **Star** it (☆) and come back to it later from the **Starred** page.
 
 ## What's covered
 
-| # | Topic | Questions |
-|---|-------|:---------:|
-| 1 | React core concepts | 20 |
-| 2 | React hooks | 21 |
-| 3 | Redux & state management | 15 |
-| 4 | JavaScript fundamentals | 25 |
-| 5 | React performance optimization | 15 |
-| 6 | Machine coding & JavaScript programming | 24 |
-| 7 | API handling & real-world scenarios | 15 |
-| 8 | Frontend architecture & senior-level topics | 15 |
-| 9 | Project & behavioural questions | 14 |
-| 10 | TypeScript & Next.js | 10 |
-| 11 | Senior-level follow-ups | 6 |
+Questions are grouped into tracks. Most tracks have a **Theory** tab and a **Coding** tab.
+
+| Track | Tabs | Questions |
+|-------|------|:---------:|
+| JavaScript | Theory (29) · Coding (18) | 47 |
+| TypeScript | Theory | 4 |
+| React | Theory (88) · Coding (6) | 94 |
+| Next.js | Theory | 8 |
+| HTML & CSS | Coming soon | – |
+| System design & behavioural | Architecture (13) · Behavioural (14) | 27 |
 
 ## Features
 
+- **Tracks** – JavaScript, TypeScript, React, Next.js and system design, each with its own page, tabs and progress. The home page shows every track and links back to where you left off.
 - **Progress tracking** – ticks are saved in your browser (`localStorage`); no account needed.
-- **Star for review** – star any question to build your own review list. Stars are saved too, and **Reset progress** keeps them.
-- **Search** questions *and* answers. Press <kbd>/</kbd> to jump to search, <kbd>Esc</kbd> to clear.
+- **Star for review** – star any question to build your own review list, collected on the **Starred** page. Stars are saved too, and **Reset progress** keeps them.
+- **Search** questions *and* answers, across all tracks from the home page or within a track. Press <kbd>/</kbd> to jump to search, <kbd>Esc</kbd> to clear.
 - **Filters** – All, Remaining, Done and Starred.
-- **Topic sidebar** with per-topic progress and the current topic highlighted.
+- **Section sidebar** with per-section progress and the current section highlighted.
 - **Light and dark themes**, following your system setting by default.
 - **Code editor** for the coding questions. JavaScript questions have **Run** (shows `console.log` output) and **Check** (runs test cases and shows expected vs. received). React questions render a live preview. Drafts are saved in your browser.
 - **Copy buttons** on code examples.
@@ -67,8 +65,10 @@ No install needed. Clone the repo and either open `index.html` directly or serve
 ```bash
 git clone https://github.com/chaudharyShub/frontend-interview-prep.git
 cd frontend-interview-prep
-npx serve .            # or: python -m http.server
+npx serve .
 ```
+
+`npx serve` reads `serve.json`, so track pages like `/react` work. Other servers (e.g. `python -m http.server`) don't know those addresses; use `/?track=react` there, or open the file directly.
 
 The code editor works either way. Opened as a file, it runs with slightly looser isolation (no network block in the JS runner, no sandbox on the React preview), which is fine for running your own code locally.
 
@@ -79,8 +79,8 @@ The code editor works either way. Opened as a file, it runs with slightly looser
 ├── index.html              # Page markup and meta tags
 ├── assets/
 │   ├── css/styles.css      # All styles (light + dark themes)
-│   ├── js/questions.js     # Question bank – edit this to add questions
-│   ├── js/app.js           # Rendering, search, filters, progress
+│   ├── js/tracks/          # Question bank, one file per track – edit these to add questions
+│   ├── js/app.js           # Routing, home page, rendering, search, filters, progress
 │   ├── js/theme.js         # Applies the saved theme before first paint
 │   ├── js/challenges.js    # Starter code and test cases for the code editor
 │   ├── js/editor.js        # Code editor UI (Try it / Run / Check)
@@ -93,17 +93,17 @@ The code editor works either way. Opened as a file, it runs with slightly looser
 │   └── og-image.png        # Link preview image
 ├── react-preview.html      # Page loaded in a sandboxed iframe for React previews
 ├── docs/                   # README screenshots
-└── vercel.json             # Security headers and caching
+├── serve.json              # Track page addresses for `npx serve`
+└── vercel.json             # Track page addresses, security headers and caching
 ```
 
 ## Adding or editing questions
 
-All content lives in [`assets/js/questions.js`](assets/js/questions.js). Each topic has a `title` and a list of `items`:
+Questions live in [`assets/js/tracks/`](assets/js/tracks/), one file per track. A track has tabs, a tab has sections, and a section has `items`:
 
 ```js
 {
-  "id": "177",          // unique and stable – progress is saved against it
-  "n": 21,              // number shown in the list
+  "id": "177",          // unique and stable – progress, stars and drafts are saved against it
   "q": "What is ...?",  // the question
   "a": "Answer text…"   // supports paragraphs, - lists, 1. lists, `code`, **bold** and ``` fences
 }
@@ -115,9 +115,10 @@ Optional fields:
 |-------|---------|
 | `note` | Short hint shown under the question |
 | `code` | Code snippet shown with a **Show code** button |
-| `group` | Sub-heading inside a topic (e.g. "React machine coding") |
 
-Never change the `id` of an existing question, or people will lose their progress and stars for it.
+Question numbers are worked out from the order in each tab. Never change the `id` of an existing question, or people will lose their progress and stars for it. Moving a question to another track or tab is fine.
+
+To add a track, create a file in `assets/js/tracks/`, add a `<script>` tag for it in `index.html`, and add its slug to the rewrites in `vercel.json` and `serve.json`.
 
 ## Adding a coding challenge
 
@@ -127,10 +128,7 @@ Coding challenges live in [`assets/js/challenges.js`](assets/js/challenges.js), 
 '95': {
   fn: 'charFrequency',                       // function the user writes
   task: 'Return an object mapping …',        // exact spec, including edge cases
-  starter: 'function charFrequency(str) {
-  
-}
-',
+  starter: 'function charFrequency(str) {\n  \n}\n',
   tests: [
     { args: ['aabcabcb'], expected: { a: 3, b: 3, c: 2 } },
     { args: [''], expected: {} },
