@@ -127,19 +127,45 @@
   }
 
   // ---------- JavaScript runner ----------
+  // Opened from disk (file://), browsers refuse `new Worker(url)`. In that case the worker is
+  // built from source instead: runner.js is loaded as a normal script (it only defines
+  // fipRunner there) and combined with challenges.js into a blob.
+  const FROM_DISK = location.protocol === 'file:';
+  let runnerLoad = null, blobUrl = null;
+  function loadRunnerSource() {
+    if (!runnerLoad) {
+      runnerLoad = new Promise((resolve, reject) => {
+        const s = document.createElement('script');
+        s.src = 'assets/js/runner.js';
+        s.onload = resolve;
+        s.onerror = () => { runnerLoad = null; reject(new Error("Couldn't load assets/js/runner.js.")); };
+        document.head.appendChild(s);
+      });
+    }
+    return runnerLoad;
+  }
   function startWorker(out) {
     try {
-      return new Worker('assets/js/runner.js');
+      if (!FROM_DISK) return new Worker('assets/js/runner.js');
+      if (!blobUrl) {
+        const src = `(${window.defineChallenges})(self);
+(${window.fipRunner})();
+`;
+        blobUrl = URL.createObjectURL(new Blob([src], { type: 'text/javascript' }));
+      }
+      return new Worker(blobUrl);
     } catch (e) {
-      out.error(location.protocol === 'file:'
-        ? 'The editor needs the page served over http. Run `npx serve .` in the project folder and open the local address.'
-        : `Couldn't start the code runner: ${e.message}`);
+      out.error(`Couldn't start the code runner: ${e.message}`);
       return null;
     }
   }
 
   function runJS(ed, mode) {
     stop(ed);
+    if (FROM_DISK && !window.fipRunner) {
+      loadRunnerSource().then(() => runJS(ed, mode), e => ed.out.error(e.message));
+      return;
+    }
     const { out, id } = ed;
     out.clear();
     const worker = startWorker(out);
@@ -299,7 +325,8 @@
       const f = document.createElement('iframe');
       f.className = 'ed-preview';
       f.title = 'Preview of your component';
-      f.setAttribute('sandbox', 'allow-scripts');
+      // A sandboxed frame can't load local files, so the sandbox is only used when served over http.
+      if (!FROM_DISK) f.setAttribute('sandbox', 'allow-scripts');
       f.src = 'react-preview.html';
       wrap.appendChild(f);
       ed.frame = f;
@@ -336,6 +363,7 @@
     const ta = $('.ed-code', panel);
     const box = $('.ed-out', panel);
     const out = makeOutput(box);
+    if (FROM_DISK && !react) loadRunnerSource().catch(() => {});
     const ed = { id, li, panel, ta, out, escaped: false, worker: null, timer: null, frame: null, ready: false, pending: false, watchdog: null, ping: null, lastPong: 0 };
     ed.primary = () => (react ? runReact(ed) : runJS(ed, 'check'));
 

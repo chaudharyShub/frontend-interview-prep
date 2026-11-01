@@ -70,7 +70,7 @@ cd frontend-interview-prep
 npx serve .            # or: python -m http.server
 ```
 
-The code editor needs the folder served over http (opening `index.html` as a file can't start the code runner).
+The code editor works either way. Opened as a file, it runs with slightly looser isolation (no network block in the JS runner, no sandbox on the React preview), which is fine for running your own code locally.
 
 ## Project structure
 

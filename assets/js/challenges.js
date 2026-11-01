@@ -17,9 +17,13 @@
  *   react: true, starter – the component code; the preview renders the default export.
  *
  * This file is loaded by the page (for starters) and by the test runner worker (for tests).
+ * Functions in the tests must not use variables from outside this file.
  */
-(function (root) {
+(function defineChallenges(root) {
   'use strict';
+
+  // Kept on root so the editor can rebuild this file inside a worker when opened from disk.
+  root.defineChallenges = defineChallenges;
 
   // Shared fixtures for the call / apply / bind tests.
   function greet(greeting, punct) { return `${greeting}, ${this.name}${punct || ''}`; }
