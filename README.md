@@ -55,9 +55,10 @@ The recommended way to use it:
 - **Filters** – All, Remaining, Done and Starred.
 - **Topic sidebar** with per-topic progress and the current topic highlighted.
 - **Light and dark themes**, following your system setting by default.
+- **Code editor** for the coding questions. JavaScript questions have **Run** (shows `console.log` output) and **Check** (runs test cases and shows expected vs. received). React questions render a live preview. Drafts are saved in your browser.
 - **Copy buttons** on code examples.
 - **Accessible** – keyboard friendly, proper ARIA states, respects reduced-motion.
-- **Fast and private** – plain HTML, CSS and JavaScript. No frameworks, no build step, no tracking, no third-party requests.
+- **Fast and private** – plain HTML, CSS and JavaScript. No build step, no tracking, no third-party requests (except the public test APIs that your own React code calls in the preview).
 
 ## Run locally
 
@@ -69,6 +70,8 @@ cd frontend-interview-prep
 npx serve .            # or: python -m http.server
 ```
 
+The code editor works either way. Opened as a file, it runs with slightly looser isolation (no network block in the JS runner, no sandbox on the React preview), which is fine for running your own code locally.
+
 ## Project structure
 
 ```
@@ -79,8 +82,16 @@ npx serve .            # or: python -m http.server
 │   ├── js/questions.js     # Question bank – edit this to add questions
 │   ├── js/app.js           # Rendering, search, filters, progress
 │   ├── js/theme.js         # Applies the saved theme before first paint
+│   ├── js/challenges.js    # Starter code and test cases for the code editor
+│   ├── js/editor.js        # Code editor UI (Try it / Run / Check)
+│   ├── js/runner.js        # Web Worker that runs JS code and tests (2 s timeout)
+│   ├── js/preview.js       # React preview: compiles JSX and renders it
+│   ├── js/loop-guard.js    # Adds infinite-loop checks to React preview code
+│   ├── css/preview.css     # Styles inside the React preview
+│   ├── vendor/             # React, ReactDOM and Sucrase (copied in, loaded only by the preview)
 │   ├── favicon.svg
 │   └── og-image.png        # Link preview image
+├── react-preview.html      # Page loaded in a sandboxed iframe for React previews
 ├── docs/                   # README screenshots
 └── vercel.json             # Security headers and caching
 ```
@@ -107,6 +118,33 @@ Optional fields:
 | `group` | Sub-heading inside a topic (e.g. "React machine coding") |
 
 Never change the `id` of an existing question, or people will lose their progress and stars for it.
+
+## Adding a coding challenge
+
+Coding challenges live in [`assets/js/challenges.js`](assets/js/challenges.js), keyed by question `id`. A question with an entry there gets a **Try it** button.
+
+```js
+'95': {
+  fn: 'charFrequency',                       // function the user writes
+  task: 'Return an object mapping …',        // exact spec, including edge cases
+  starter: 'function charFrequency(str) {
+  
+}
+',
+  tests: [
+    { args: ['aabcabcb'], expected: { a: 3, b: 3, c: 2 } },
+    { args: [''], expected: {} },
+  ],
+}
+```
+
+Results are compared deeply, so object key order doesn't matter. For polyfills and timing questions, a test can use `run: (fn, t) => actual` instead of `args`; see the debounce and `myMap` entries for examples. React challenges only need `react: true`, a `task` and `starter` code.
+
+### How code runs safely
+
+- **JavaScript** runs in a fresh Web Worker for every run, stopped after 2 seconds, with no network access. Only `runner.js` is allowed to use `new Function` (see `vercel.json`); the main page keeps a strict security policy.
+- **React** code runs in `react-preview.html` inside a sandboxed iframe, so it can't read the page or your saved progress. JSX is compiled by [Sucrase](https://github.com/alangpierce/sucrase).
+- **Infinite loops in React code:** after compiling, every `while`, `do…while` and `for(;;)` loop gets a time check (`loop-guard.js`). A loop that runs for over 1 second in one go (a render, a click handler, an effect) throws an error that is shown in the preview. If the preview still stops responding, the editor shuts the frame down after 3 seconds.
 
 ## Contributing
 

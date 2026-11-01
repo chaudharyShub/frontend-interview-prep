@@ -1,0 +1,31 @@
+/* Styles for the React preview iframe (react-preview.html). Kept plain so the user's own UI shows through. */
+
+:root {
+  --bg: #ffffff; --text: #111827; --muted: #6b7280; --line: #d1d5db; --btn: #f3f4f6; --danger: #b91c1c; --danger-bg: #fef2f2;
+  color-scheme: light;
+}
+:root[data-theme="dark"] {
+  --bg: #151922; --text: #e8eaf0; --muted: #8a91a0; --line: #333a48; --btn: #1b202b; --danger: #fca5a5; --danger-bg: #2a1416;
+  color-scheme: dark;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html, body { margin: 0; background: var(--bg); color: var(--text); }
+body { padding: 14px 16px; font: 14px/1.5 ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif; }
+
+h1, h2, h3 { margin: 0 0 10px; line-height: 1.25; }
+p { margin: 0 0 10px; }
+ul, ol { margin: 0 0 10px; padding-left: 22px; }
+pre { margin: 0 0 10px; white-space: pre-wrap; font: 12.5px/1.5 ui-monospace, Consolas, monospace; }
+
+button, input, select, textarea {
+  font: inherit; color: inherit; background: var(--btn);
+  border: 1px solid var(--line); border-radius: 6px; padding: 4px 10px; margin: 0 6px 6px 0;
+}
+button { cursor: pointer; }
+button:disabled { opacity: .5; cursor: not-allowed; }
+
+.error {
+  color: var(--danger); background: var(--danger-bg);
+  border: 1px solid currentColor; border-radius: 8px; padding: 10px 12px;
+}
