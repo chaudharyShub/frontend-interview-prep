@@ -2,42 +2,104 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "cleanUrls": true,
   "trailingSlash": false,
-  "rewrites": [
-    { "source": "/:page(javascript|typescript|react|nextjs|html-css|system-design|starred)", "destination": "/" }
+  "redirects": [
+    {
+      "source": "/javascript",
+      "has": [
+        {
+          "type": "query",
+          "key": "tab",
+          "value": "coding"
+        }
+      ],
+      "destination": "/javascript/coding",
+      "permanent": true
+    },
+    {
+      "source": "/react",
+      "has": [
+        {
+          "type": "query",
+          "key": "tab",
+          "value": "coding"
+        }
+      ],
+      "destination": "/react/coding",
+      "permanent": true
+    },
+    {
+      "source": "/system-design",
+      "has": [
+        {
+          "type": "query",
+          "key": "tab",
+          "value": "behavioural"
+        }
+      ],
+      "destination": "/system-design/behavioural",
+      "permanent": true
+    }
   ],
   "headers": [
     {
       "source": "/((?!assets/js/runner\\.js|react-preview).*)",
       "headers": [
-        { "key": "Content-Security-Policy", "value": "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'; frame-ancestors 'none'" },
-        { "key": "X-Frame-Options", "value": "DENY" }
+        {
+          "key": "Content-Security-Policy",
+          "value": "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'; frame-ancestors 'none'"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        }
       ]
     },
     {
       "source": "/assets/js/runner.js",
       "headers": [
-        { "key": "Content-Security-Policy", "value": "default-src 'none'; script-src 'self' 'unsafe-eval'; connect-src 'none'" }
+        {
+          "key": "Content-Security-Policy",
+          "value": "default-src 'none'; script-src 'self' 'unsafe-eval'; connect-src 'none'"
+        }
       ]
     },
     {
       "source": "/react-preview(.*)",
       "headers": [
-        { "key": "Content-Security-Policy", "value": "default-src 'none'; script-src 'self' 'unsafe-eval'; style-src 'self'; img-src 'self' https: data:; font-src 'self'; connect-src https://jsonplaceholder.typicode.com https://dummyjson.com; base-uri 'none'; form-action 'none'; frame-ancestors 'self'" },
-        { "key": "X-Frame-Options", "value": "SAMEORIGIN" }
+        {
+          "key": "Content-Security-Policy",
+          "value": "default-src 'none'; script-src 'self' 'unsafe-eval'; style-src 'self'; img-src 'self' https: data:; font-src 'self'; connect-src https://jsonplaceholder.typicode.com https://dummyjson.com; base-uri 'none'; form-action 'none'; frame-ancestors 'self'"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "SAMEORIGIN"
+        }
       ]
     },
     {
       "source": "/(.*)",
       "headers": [
-        { "key": "X-Content-Type-Options", "value": "nosniff" },
-        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
-        { "key": "Permissions-Policy", "value": "camera=(), microphone=(), geolocation=(), interest-cohort=()" }
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "strict-origin-when-cross-origin"
+        },
+        {
+          "key": "Permissions-Policy",
+          "value": "camera=(), microphone=(), geolocation=(), interest-cohort=()"
+        }
       ]
     },
     {
       "source": "/assets/(.*)",
       "headers": [
-        { "key": "Cache-Control", "value": "public, max-age=3600, stale-while-revalidate=86400" }
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=3600, stale-while-revalidate=86400"
+        }
       ]
     }
   ]

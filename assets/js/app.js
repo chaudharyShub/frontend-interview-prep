@@ -46,43 +46,13 @@
   // ---------- Helpers ----------
   const $ = (sel, root = document) => root.querySelector(sel);
   const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
-  const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const { esc, inline, codeBlock, md, slugify } = window.MD;
   const plural = (n, word) => `${n} ${word}${n === 1 ? '' : 's'}`;
 
   const CHEV = '<svg class="chev" viewBox="0 0 20 20" width="18" height="18" aria-hidden="true"><path d="m5 7.5 5 5 5-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
   const STAR = '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="m12 3 2.7 5.6 6.1.8-4.5 4.2 1.1 6.1L12 16.8l-5.4 2.9 1.1-6.1-4.5-4.2 6.1-.8Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>';
   const CHEV_SM = '<svg class="chev-sm" viewBox="0 0 20 20" width="14" height="14" aria-hidden="true"><path d="m5 7.5 5 5 5-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 
-  // Minimal Markdown: paragraphs, - / 1. lists, `code`, **bold**, ``` fenced blocks.
-  function inline(t) {
-    return esc(t)
-      .replace(/`([^`]+)`/g, '<code>$1</code>')
-      .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
-  }
-  function codeBlock(code) {
-    return `<div class="codeblock"><pre><code>${esc(code)}</code></pre><button type="button" class="copy">Copy</button></div>`;
-  }
-  function md(src) {
-    let out = '';
-    src.split(/```\w*\n([\s\S]*?)```/).forEach((part, i) => {
-      if (i % 2) { out += codeBlock(part.replace(/\n$/, '')); return; }
-      let listType = null;
-      const close = () => { if (listType) { out += `</${listType}>`; listType = null; } };
-      part.split('\n').forEach(line => {
-        const ul = line.match(/^\s*- (.*)/), ol = line.match(/^\s*\d+\. (.*)/);
-        const m = ul || ol, type = ul ? 'ul' : ol ? 'ol' : null;
-        if (m) {
-          if (listType !== type) { close(); out += `<${type}>`; listType = type; }
-          out += `<li>${inline(m[1])}</li>`;
-        } else {
-          close();
-          if (line.trim()) out += `<p>${inline(line)}</p>`;
-        }
-      });
-      close();
-    });
-    return out;
-  }
   const plain = s => (s || '').replace(/[`*]/g, '').toLowerCase();
 
   // ---------- Question index ----------
@@ -91,25 +61,31 @@
   TRACKS.forEach(track => track.tabs.forEach(tab => tab.sections.forEach(section => section.items.forEach(item => {
     ENTRIES.push({ item, track, tab, section, text: plain(`${item.q} ${item.note || ''} ${item.a || ''} ${item.code || ''}`) });
   }))));
+  const TRACK_OF = new Map(ENTRIES.map(e => [e.item, e.track]));
   const idsOf = pred => ENTRIES.filter(pred).map(e => e.item.id);
   const countDone = ids => ids.filter(id => state[id]).length;
   const label = t => t.short || t.title;
 
   // ---------- Routing ----------
-  // Over http: /react, /react?tab=coding, /starred (Vercel rewrites these to index.html).
-  // From disk:  index.html?track=react&tab=coding. `?track=` also works over http.
+  // Over http: /react, /react/coding, /starred. Each is a pre-rendered page made by scripts/build.mjs.
+  // From disk:  index.html?track=react&tab=coding. `?track=` and `?tab=` also work over http.
   function link(track, tab, hash) {
     let url;
     if (FROM_DISK) url = 'index.html' + (track ? `?track=${track}${tab ? `&tab=${tab}` : ''}` : '');
-    else url = track ? `${track}${tab ? `?tab=${tab}` : ''}` : './';
+    else url = '/' + (track ? `${track}${tab ? `/${tab}` : ''}` : '');
     return url + (hash ? `#${hash}` : '');
   }
+  // A question's own page (also pre-rendered), e.g. /javascript/what-are-closures-give-a-real-world-example.
+  const questionLink = (track, item) => FROM_DISK
+    ? `${track.slug}/${slugify(item.q)}.html`
+    : `/${track.slug}/${slugify(item.q)}`;
   const params = new URLSearchParams(location.search);
-  let slug = params.get('track') || '';
-  if (!slug && !FROM_DISK) slug = decodeURIComponent(location.pathname.split('/').filter(Boolean).pop() || '');
+  const parts = FROM_DISK ? [] : location.pathname.replace(/\.html$/, '').split('/').filter(Boolean).map(decodeURIComponent);
+  const slug = params.get('track') || parts[0] || '';
+  const tabSlug = params.get('tab') || parts[1] || '';
   const track = TRACKS.find(t => t.slug === slug) || null;
   const view = slug === 'starred' ? 'starred' : track ? 'track' : 'home';
-  const tab = track ? (track.tabs.find(t => t.slug === params.get('tab')) || track.tabs[0] || null) : null;
+  const tab = track ? (track.tabs.find(t => t.slug === tabSlug) || track.tabs[0] || null) : null;
 
   // ---------- Page meta (title, description, canonical) ----------
   function setMeta(title, description, path) {
@@ -120,7 +96,7 @@
     set('meta[property="og:description"]', 'content', description);
     const canonical = $('link[rel="canonical"]');
     if (canonical) {
-      const url = new URL(path, canonical.href).href;
+      const url = new URL('/' + path, canonical.href).href;
       canonical.href = url;
       set('meta[property="og:url"]', 'content', url);
     }
@@ -138,8 +114,9 @@
     $('#heroEyebrow').classList.add('hidden');
 
     const canonical = $('link[rel="canonical"]');
-    if (!canonical) return;
-    const site = new URL('./', canonical.href);
+    // Pre-rendered pages already carry the breadcrumb data.
+    if (!canonical || $('script[type="application/ld+json"][data-breadcrumbs]')) return;
+    const site = new URL('/', canonical.href);
     const data = document.createElement('script');
     data.type = 'application/ld+json';
     data.textContent = JSON.stringify({
@@ -232,6 +209,7 @@
   // =====================================================================
   function renderHome() {
     $('#homeView').classList.remove('hidden');
+    $('#trackView').classList.add('hidden');
     $('.skip-link').setAttribute('href', '#homeView');
     $('.skip-link').textContent = 'Skip to tracks';
     const live = TRACKS.filter(t => !t.comingSoon);
@@ -332,6 +310,7 @@
   // =====================================================================
   function renderList() {
     $('#trackView').classList.remove('hidden');
+    $('#homeView').classList.add('hidden');
     let sections, scope, scopeIds;
 
     if (view === 'track') {
@@ -341,11 +320,11 @@
       setMeta(
         `${track.title} interview questions${tab && track.tabs.length > 1 ? ` – ${tab.title}` : ''} – Frontend Interview Prep`,
         track.description,
-        track.slug + (isFirst ? '' : `?tab=${tab.slug}`));
+        track.slug + (isFirst ? '' : `/${tab.slug}`));
       const crumbs = [{ name: 'Home', href: link(), path: '' }];
       if (tab && track.tabs.length > 1) {
         crumbs.push({ name: track.title, href: link(track.slug), path: track.slug });
-        crumbs.push({ name: tab.title, path: track.slug + (isFirst ? '' : `?tab=${tab.slug}`) });
+        crumbs.push({ name: tab.title, path: track.slug + (isFirst ? '' : `/${tab.slug}`) });
       } else {
         crumbs.push({ name: track.title, path: track.slug });
       }
@@ -395,6 +374,8 @@
     // ---------- Render sections ----------
     const list = $('#list');
     const toc = $('#toc');
+    list.innerHTML = ''; // replace the pre-rendered copy with the interactive one
+    toc.innerHTML = '';
     const ANSWERS = {};
     const CODE = {};
     let num = 0;
@@ -434,6 +415,7 @@
           ${it.code || it.a ? `<div class="more"><div class="more-btns">
             ${it.code ? `<button type="button" class="linkbtn codebtn" aria-expanded="false">Show code ${CHEV_SM}</button>` : ''}
             ${it.a ? `<button type="button" class="linkbtn ansbtn" aria-expanded="false">Show answer ${CHEV_SM}</button>` : ''}
+            <a class="linkbtn pagelink" href="${questionLink(TRACK_OF.get(it), it)}">Open page</a>
           </div>
           ${it.code ? '<div class="qcode hidden"></div>' : ''}
           ${it.a ? '<div class="answer hidden"></div>' : ''}</div>` : ''}

@@ -56,6 +56,7 @@ Questions are grouped into tracks. Most tracks have a **Theory** tab and a **Cod
 - **Code editor** for the coding questions. JavaScript questions have **Run** (shows `console.log` output) and **Check** (runs test cases and shows expected vs. received). React questions render a live preview. Drafts are saved in your browser.
 - **Copy buttons** on code examples.
 - **Accessible** – keyboard friendly, proper ARIA states, respects reduced-motion.
+- **Search-engine friendly** – every track, tab and question has its own pre-rendered page with its own title, description and canonical URL, plus a sitemap and structured data.
 - **Fast and private** – plain HTML, CSS and JavaScript. No build step, no tracking, no third-party requests (except the public test APIs that your own React code calls in the preview).
 
 ## Run locally
@@ -68,7 +69,7 @@ cd frontend-interview-prep
 npx serve .
 ```
 
-`npx serve` reads `serve.json`, so track pages like `/react` work. Other servers (e.g. `python -m http.server`) don't know those addresses; use `/?track=react` there, or open the file directly.
+`npx serve` serves `react.html` at `/react` (see `serve.json`). Other servers (e.g. `python -m http.server`) need the `.html` on the end, or use `/?track=react`.
 
 The code editor works either way. Opened as a file, it runs with slightly looser isolation (no network block in the JS runner, no sandbox on the React preview), which is fine for running your own code locally.
 
@@ -76,11 +77,21 @@ The code editor works either way. Opened as a file, it runs with slightly looser
 
 ```
 .
-├── index.html              # Page markup and meta tags
+├── templates/              # Page markup – edit these, not the generated .html files
+│   ├── layout.html         # Shared <head>, header and footer
+│   └── app.html            # Checklist body (home, track and starred pages)
+├── scripts/build.mjs       # Generates the pages below from templates/ and the question bank
+├── index.html              # Generated: home page
+├── <track>.html            # Generated: track pages, e.g. react.html → /react
+├── <track>/                # Generated: other tabs (react/coding.html) and one page per question
+├── 404.html, starred.html  # Generated
+├── sitemap.xml             # Generated
 ├── assets/
 │   ├── css/styles.css      # All styles (light + dark themes)
 │   ├── js/tracks/          # Question bank, one file per track – edit these to add questions
 │   ├── js/app.js           # Routing, home page, rendering, search, filters, progress
+│   ├── js/markdown.js      # Answer formatting and URL slugs (shared with the build script)
+│   ├── js/page.js          # Theme toggle and copy buttons on question pages
 │   ├── js/theme.js         # Applies the saved theme before first paint
 │   ├── js/challenges.js    # Starter code and test cases for the code editor
 │   ├── js/editor.js        # Code editor UI (Try it / Run / Check)
@@ -93,8 +104,8 @@ The code editor works either way. Opened as a file, it runs with slightly looser
 │   └── og-image.png        # Link preview image
 ├── react-preview.html      # Page loaded in a sandboxed iframe for React previews
 ├── docs/                   # README screenshots
-├── serve.json              # Track page addresses for `npx serve`
-└── vercel.json             # Track page addresses, security headers and caching
+├── serve.json              # Clean URLs for `npx serve`
+└── vercel.json             # Clean URLs, old ?tab= redirects (generated), security headers, caching
 ```
 
 ## Adding or editing questions
@@ -116,9 +127,17 @@ Optional fields:
 | `note` | Short hint shown under the question |
 | `code` | Code snippet shown with a **Show code** button |
 
+After editing questions, rebuild the pages:
+
+```bash
+node scripts/build.mjs
+```
+
+This needs Node 18+ and nothing else. It writes a page for every track, tab and question, plus the sitemap, so search engines can read the content. A GitHub check fails if you forget. Each question's page address comes from its text (`What are closures?` → `/javascript/what-are-closures`), so rewording a question changes its address; the old one then shows the 404 page.
+
 Question numbers are worked out from the order in each tab. Never change the `id` of an existing question, or people will lose their progress and stars for it. Moving a question to another track or tab is fine.
 
-To add a track, create a file in `assets/js/tracks/`, add a `<script>` tag for it in `index.html`, and add its slug to the rewrites in `vercel.json` and `serve.json`.
+To add a track, create a file in `assets/js/tracks/`, add its slug to `TRACK_FILES` in `scripts/build.mjs`, and rebuild.
 
 ## Adding a coding challenge
 
@@ -150,7 +169,7 @@ Spotted a mistake or have a question worth adding? [Open an issue](https://githu
 
 ## Deployment
 
-The site is deployed on [Vercel](https://vercel.com). Every push to `main` goes live automatically; no build settings are needed.
+The site is deployed on [Vercel](https://vercel.com). Every push to `main` goes live automatically; no build settings are needed, because the generated pages are committed.
 
 ## More from the author
 

@@ -1,0 +1,87 @@
+  <section class="hero">
+    <div class="container">
+      <nav class="breadcrumb{{breadcrumbHidden}}" id="breadcrumb" aria-label="Breadcrumb">{{breadcrumb}}</nav>
+      <p class="eyebrow{{eyebrowHidden}}" id="heroEyebrow">JavaScript · React · Next.js · System design</p>
+      <h1 id="heroTitle">{{heroTitle}}</h1>
+      <p class="lead" id="heroLead">{{heroLead}}</p>
+      <div class="stats" id="stats">
+        <div class="stat"><span class="stat-num" id="statTotal">{{statTotal}}</span><span class="stat-label">Questions</span></div>
+        <div class="stat"><span class="stat-num" id="statSections">{{statSections}}</span><span class="stat-label" id="statSectionsLabel">{{statSectionsLabel}}</span></div>
+        <div class="stat"><span class="stat-num" id="statStarred">0</span><span class="stat-label">Starred</span></div>
+        <div class="stat stat-progress">
+          <div class="stat-row"><span class="stat-num" id="statPct">0%</span><span class="stat-label" id="statDone">0 of {{statTotal}} done</span></div>
+          <div class="bar" role="progressbar" aria-label="Overall progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="ovbarWrap"><div class="bar-fill" id="ovbar"></div></div>
+        </div>
+      </div>
+      <nav class="tabs{{tabsHidden}}" id="tabs" aria-label="Question type">{{tabs}}</nav>
+    </div>
+  </section>
+
+  <main class="container home{{homeHidden}}" id="homeView">
+    <div class="search home-search">
+      <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="2"/><path d="m20 20-4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      <input type="search" id="gq" placeholder="Search all questions and answers…" aria-label="Search all questions and answers" autocomplete="off">
+      <kbd class="kbd" aria-hidden="true">/</kbd>
+    </div>
+    <div class="gresults hidden" id="gresults" aria-live="polite"></div>
+    <div id="homeBody">
+      <a class="continue hidden" id="continue" href="{{home}}"></a>
+      <h2 class="home-h">Tracks</h2>
+      <div class="track-grid" id="trackGrid">{{trackGrid}}</div>
+      <div class="home-foot">
+        <a class="btn" id="starredLink" href="{{starredHref}}">★ Starred questions</a>
+        <button type="button" class="btn btn-danger" id="resetAll">Reset all progress</button>
+      </div>
+    </div>
+  </main>
+
+  <div class="container layout{{trackHidden}}" id="trackView">
+    <aside class="sidebar" aria-label="Sections">
+      <nav class="toc">
+        <p class="toc-title" id="tocTitle">{{tocTitle}}</p>
+        <ol id="toc">{{toc}}</ol>
+      </nav>
+    </aside>
+
+    <main id="main" class="content">
+      <div class="toolbar" id="toolbar">
+        <div class="search">
+          <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="2"/><path d="m20 20-4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          <input type="search" id="q" placeholder="Search questions and answers…" aria-label="Search questions and answers" autocomplete="off">
+          <kbd class="kbd" aria-hidden="true">/</kbd>
+        </div>
+        <div class="toolbar-row">
+          <div class="seg" id="filter" role="group" aria-label="Filter questions">
+            <button type="button" data-f="all" class="on" aria-pressed="true">All</button>
+            <button type="button" data-f="todo" aria-pressed="false">Remaining</button>
+            <button type="button" data-f="done" aria-pressed="false">Done</button>
+            <button type="button" data-f="star" aria-pressed="false">★ Starred</button>
+          </div>
+          <div class="actions">
+            <button type="button" class="btn" id="toggleAnswers">Show all answers</button>
+            <button type="button" class="btn" id="toggleAll">Collapse all</button>
+            <button type="button" class="btn btn-danger" id="reset">Reset progress</button>
+          </div>
+        </div>
+        <p class="result-count" id="resultCount" aria-live="polite"></p>
+      </div>
+
+      <div id="list">{{list}}</div>
+      <div class="empty hidden" id="empty">
+        <p class="empty-title" id="emptyTitle">No questions match</p>
+        <p id="emptyHint">Try a different search term or filter.</p>
+      </div>
+    </main>
+  </div>
+
+  <dialog class="modal" id="confirmDialog" aria-labelledby="confirmTitle" aria-describedby="confirmMsg">
+    <h2 class="modal-title" id="confirmTitle"></h2>
+    <p class="modal-msg" id="confirmMsg"></p>
+    <div class="modal-actions">
+      <button type="button" class="btn" id="confirmCancel">Cancel</button>
+      <button type="button" class="btn btn-solid-danger" id="confirmOk">Confirm</button>
+    </div>
+  </dialog>
+
+  <noscript><p class="noscript">This checklist needs JavaScript enabled.</p></noscript>
+

@@ -531,6 +531,29 @@ pre code { font-variant-ligatures: none; background: none; color: inherit; paddi
 .copy:hover { color: #fff; }
 @media (hover: none) { .copy { opacity: 1; } }
 
+/* ---------- Question pages (one page per question) ---------- */
+
+.qhero h1 { font-size: clamp(24px, 3.4vw, 36px); max-width: 860px; }
+.qhero .lead { margin-bottom: 0; }
+.qpage { max-width: 860px; padding-bottom: 64px; }
+.qpage-h { margin: 28px 0 10px; font-size: 13px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+.qpage-article .answer { margin-top: 0; font-size: 15.5px; line-height: 1.65; }
+.qpage-cta { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; margin-top: 22px; color: var(--muted); font-size: 14px; }
+.qpage-cta .btn:hover { text-decoration: none; }
+.qpage-pn { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 36px; }
+.qpage-pn a {
+  display: flex; flex-direction: column; gap: 4px; padding: 14px 16px;
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
+  color: var(--text); font-weight: 550; font-size: 14.5px; box-shadow: var(--shadow-sm);
+}
+.qpage-pn a:hover { border-color: var(--line-strong); text-decoration: none; }
+.qpage-pn a span { color: var(--muted); font-size: 12.5px; font-weight: 500; }
+.qpage-next { text-align: right; }
+@media (max-width: 600px) { .qpage-pn { grid-template-columns: 1fr; } .qpage-next { text-align: left; } }
+.qpage-related ul { margin: 0 0 14px; padding-left: 20px; }
+.qpage-related li { margin: 6px 0; }
+.qpage-related p { margin: 0; font-weight: 550; }
+
 /* ---------- Code editor ---------- */
 
 .visually-hidden {
