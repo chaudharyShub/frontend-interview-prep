@@ -20,6 +20,7 @@
   --star: #b45309;
   --star-soft: #fef3c7;
   --danger: #dc2626;
+  --maker: #c2410c;
   --shadow-sm: 0 1px 2px rgb(16 24 40 / 0.05);
   --shadow: 0 1px 3px rgb(16 24 40 / 0.06), 0 4px 12px rgb(16 24 40 / 0.04);
   --radius: 12px;
@@ -48,6 +49,7 @@
     --star: #fbbf24;
     --star-soft: #33270d;
     --danger: #f87171;
+  --maker: #fb923c;
     --shadow-sm: none;
     --shadow: none;
     color-scheme: dark;
@@ -72,6 +74,7 @@
   --star: #fbbf24;
   --star-soft: #33270d;
   --danger: #f87171;
+  --maker: #fb923c;
   --shadow-sm: none;
   --shadow: none;
   color-scheme: dark;
@@ -601,7 +604,12 @@ pre code { font-variant-ligatures: none; background: none; color: inherit; paddi
 .footer { border-top: 1px solid var(--line); padding: 24px 0 32px; color: var(--muted); font-size: 13.5px; }
 .footer-inner { display: flex; flex-wrap: wrap; gap: 8px 24px; justify-content: space-between; }
 .footer p { margin: 0; }
-.footer .footer-more { flex-basis: 100%; }
+.footer a { color: var(--text-2); }
+.footer-site { display: flex; flex-direction: column; gap: 4px; }
+/* Shubham Works block: one column, quiet text, only the mark is orange. */
+.made-by { display: flex; flex-direction: column; gap: 4px; font-size: 12.5px; line-height: 1.6; }
+.made-by-title { display: flex; align-items: center; gap: 6px; font-weight: 600; color: var(--text-2); }
+.maker-mark { flex-shrink: 0; color: var(--maker); }
 
 /* ---------- Confirm dialog ---------- */
 
