@@ -29,7 +29,8 @@ const TRACK_FILES = ['javascript', 'typescript', 'react', 'nextjs', 'html-css', 
 const CHECK = process.argv.includes('--check');
 
 // ---------- Load the data with the same code the browser runs ----------
-const read = rel => fs.readFileSync(path.join(ROOT, rel), 'utf8');
+// Line endings are normalised so the output is the same on Windows and Linux (CI).
+const read = rel => fs.readFileSync(path.join(ROOT, rel), 'utf8').replace(/\r\n/g, '\n');
 const sandbox = vm.createContext({ window: {} });
 for (const rel of ['assets/js/markdown.js', ...TRACK_FILES.map(t => `assets/js/tracks/${t}.js`)]) {
   vm.runInContext(read(rel), sandbox, { filename: rel });
