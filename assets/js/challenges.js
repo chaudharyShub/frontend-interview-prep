@@ -1,5 +1,5 @@
 /**
- * Coding challenges for the in-page editor, keyed by question id (see questions.js).
+ * Coding challenges for the in-page editor, keyed by question id (see assets/js/tracks/).
  *
  * JavaScript challenges:
  *   fn       – name of the function the user writes (looked up after their code runs)

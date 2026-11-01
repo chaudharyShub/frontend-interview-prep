@@ -4,4 +4,36 @@
     <loc>https://frontend-interview-prod.vercel.app/</loc>
     <changefreq>monthly</changefreq>
   </url>
+  <url>
+    <loc>https://frontend-interview-prod.vercel.app/javascript</loc>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://frontend-interview-prod.vercel.app/javascript?tab=coding</loc>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://frontend-interview-prod.vercel.app/typescript</loc>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://frontend-interview-prod.vercel.app/react</loc>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://frontend-interview-prod.vercel.app/react?tab=coding</loc>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://frontend-interview-prod.vercel.app/nextjs</loc>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://frontend-interview-prod.vercel.app/system-design</loc>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://frontend-interview-prod.vercel.app/system-design?tab=behavioural</loc>
+    <changefreq>monthly</changefreq>
+  </url>
 </urlset>
