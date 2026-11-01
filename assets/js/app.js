@@ -126,6 +126,35 @@
     }
   }
 
+  // ---------- Breadcrumbs ----------
+  // crumbs: [{ name, href }]; the last one is the current page (no link).
+  // Also adds BreadcrumbList data for search engines (a data block, so the security policy allows it).
+  function setBreadcrumbs(crumbs) {
+    const nav = $('#breadcrumb');
+    nav.innerHTML = '<ol>' + crumbs.map((c, i) => i === crumbs.length - 1
+      ? `<li><span aria-current="page">${esc(c.name)}</span></li>`
+      : `<li><a href="${c.href}">${esc(c.name)}</a></li>`).join('') + '</ol>';
+    nav.classList.remove('hidden');
+    $('#heroEyebrow').classList.add('hidden');
+
+    const canonical = $('link[rel="canonical"]');
+    if (!canonical) return;
+    const site = new URL('./', canonical.href);
+    const data = document.createElement('script');
+    data.type = 'application/ld+json';
+    data.textContent = JSON.stringify({
+      '@context': 'https://schema.org',
+      '@type': 'BreadcrumbList',
+      itemListElement: crumbs.map((c, i) => ({
+        '@type': 'ListItem',
+        position: i + 1,
+        name: c.name,
+        item: new URL(c.path, site).href,
+      })),
+    });
+    document.head.appendChild(data);
+  }
+
   // ---------- Header: track links ----------
   $('#trackNav').innerHTML = TRACKS.filter(t => !t.comingSoon).map(t =>
     `<a href="${link(t.slug)}"${track === t ? ' aria-current="page"' : ''}>${esc(label(t))}</a>`).join('') +
@@ -313,7 +342,14 @@
         `${track.title} interview questions${tab && track.tabs.length > 1 ? ` – ${tab.title}` : ''} – Frontend Interview Prep`,
         track.description,
         track.slug + (isFirst ? '' : `?tab=${tab.slug}`));
-      $('#heroEyebrow').textContent = 'Track';
+      const crumbs = [{ name: 'Home', href: link(), path: '' }];
+      if (tab && track.tabs.length > 1) {
+        crumbs.push({ name: track.title, href: link(track.slug), path: track.slug });
+        crumbs.push({ name: tab.title, path: track.slug + (isFirst ? '' : `?tab=${tab.slug}`) });
+      } else {
+        crumbs.push({ name: track.title, path: track.slug });
+      }
+      setBreadcrumbs(crumbs);
       $('#heroTitle').textContent = `${track.title} interview questions`;
       $('#heroLead').textContent = track.description;
       scope = `${track.slug}/${tab ? tab.slug : ''}`;
@@ -336,7 +372,7 @@
       }
     } else {
       setMeta('Starred questions – Frontend Interview Prep', 'Your starred frontend interview questions, from every track.', 'starred');
-      $('#heroEyebrow').textContent = 'Your review list';
+      setBreadcrumbs([{ name: 'Home', href: link(), path: '' }, { name: 'Starred', path: 'starred' }]);
       $('#heroTitle').textContent = 'Starred questions';
       $('#heroLead').textContent = 'Every question you starred, from all tracks. Unstar a question once you can answer it confidently.';
       $('#tocTitle').textContent = 'Tracks';
