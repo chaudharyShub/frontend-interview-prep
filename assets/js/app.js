@@ -121,6 +121,8 @@
     set('meta[name="description"]', 'content', description);
     set('meta[property="og:title"]', 'content', title);
     set('meta[property="og:description"]', 'content', description);
+    set('meta[name="twitter:title"]', 'content', title);
+    set('meta[name="twitter:description"]', 'content', description);
     const canonical = $('link[rel="canonical"]');
     if (canonical) {
       const url = appUrl(canonical.href, path);

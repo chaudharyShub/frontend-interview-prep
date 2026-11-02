@@ -22,7 +22,7 @@
 
 ## About
 
-A focused checklist for mid- to senior-level frontend interviews (around 4–5 years of experience). Each question comes with a concise model answer, and code where it helps.
+A focused checklist for mid- to senior-level frontend interviews (roughly 2 to 4 years of experience). Each question comes with a concise model answer, and code where it helps.
 
 The recommended way to use it:
 
