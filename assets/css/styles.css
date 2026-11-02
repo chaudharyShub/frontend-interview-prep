@@ -259,9 +259,9 @@ button { font: inherit; color: inherit; }
   display: flex; flex-direction: column; gap: 8px;
   padding: 18px; border-radius: var(--radius);
   background: var(--surface); border: 1px solid var(--line); box-shadow: var(--shadow);
-  color: var(--text); transition: border-color .15s, transform .15s;
+  color: var(--text);
 }
-a.track-card:hover { text-decoration: none; border-color: color-mix(in srgb, var(--accent) 45%, var(--line)); transform: translateY(-1px); }
+a.track-card:hover { text-decoration: none; border-color: color-mix(in srgb, var(--accent) 45%, var(--line)); }
 .track-card h3 { margin: 0; font-size: 17px; font-weight: 650; letter-spacing: -0.01em; }
 .track-card p { margin: 0; color: var(--text-2); font-size: 14px; }
 .track-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
@@ -635,12 +635,58 @@ pre code { font-variant-ligatures: none; background: none; color: inherit; paddi
 
 .noscript { text-align: center; padding: 24px; color: var(--danger); }
 
+/* ---------- Motion ----------
+   Light motion, CSS only (the same style as CloudPrep): content fades and rises into place
+   once, and cards and large buttons lift slightly on hover. No loops, no parallax.
+   The reduced-motion rules below switch all of it off. */
+
+:root { --ease: cubic-bezier(.2, 0, 0, 1); --shadow-lift: 0 10px 24px -10px rgb(0 0 0 / .28); }
+@keyframes rise { from { opacity: 0; transform: translateY(10px); } }
+@keyframes rise-sm { from { opacity: 0; transform: translateY(-4px); } }
+
+/* Hero: one line after another. */
+.hero .breadcrumb, .hero .eyebrow, .hero h1, .hero .lead, .hero .stats, .hero .tabs,
+.lp-cta, .lp-proof, .lp-shot { animation: rise 560ms var(--ease) both; }
+.hero h1 { animation-delay: 70ms; }
+.hero .lead { animation-delay: 140ms; }
+.hero .stats, .lp-cta { animation-delay: 210ms; }
+.hero .tabs, .lp-proof { animation-delay: 280ms; }
+.lp-shot { animation-delay: 200ms; animation-duration: 700ms; }
+
+/* App: track cards and question sections follow the hero. Only while the page first loads
+   (theme.js sets data-intro briefly), so search and filters don't replay it. */
+:root[data-intro] :is(.track-grid > *, .continue, .section) { animation: rise 560ms var(--ease) both; animation-delay: 300ms; }
+:root[data-intro] :is(.track-grid > :nth-child(2), .section:nth-child(2)) { animation-delay: 350ms; }
+:root[data-intro] :is(.track-grid > :nth-child(3), .section:nth-child(3)) { animation-delay: 400ms; }
+:root[data-intro] :is(.track-grid > :nth-child(4), .section:nth-child(4)) { animation-delay: 450ms; }
+:root[data-intro] :is(.track-grid > :nth-child(5), .section:nth-child(5)) { animation-delay: 500ms; }
+:root[data-intro] :is(.track-grid > :nth-child(n+6), .section:nth-child(n+6)) { animation-delay: 550ms; }
+
+/* Answers and code slide in when opened. */
+.answer, .qcode { animation: rise-sm 220ms var(--ease) both; }
+
+/* Hover lift on cards and large buttons. */
+a.track-card, .continue, .lp-track:not(.lp-track-soon), .lp-steps li, .btn-lg, .nav-cta {
+  transition: transform 180ms var(--ease), box-shadow 180ms var(--ease), border-color .15s, background .15s, color .15s;
+}
+a.track-card:hover, .continue:hover, .lp-track:not(.lp-track-soon):hover, .lp-steps li:hover, .btn-lg:hover, .nav-cta:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow-lift);
+}
+
+/* Landing page sections fade in as they scroll into view. landing.js adds these classes,
+   so without JavaScript (or for search engines) everything is simply shown. */
+:root .reveal { opacity: 0; transform: translateY(12px); transition: opacity 700ms var(--ease), transform 700ms var(--ease); }
+:root .reveal.shown { opacity: 1; transform: none; }
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { transition: none !important; animation: none !important; scroll-behavior: auto !important; }
+  .reveal, a.track-card:hover, .continue:hover, .lp-track:hover, .lp-steps li:hover, .btn-lg:hover, .nav-cta:hover { transform: none !important; }
+  .reveal { opacity: 1 !important; }
 }
 
 @media print {
   .nav, .sidebar, .toolbar, .footer, .more-btns, .copy, .starbtn, .editor { display: none !important; }
   .layout { display: block; }
   .section { box-shadow: none; break-inside: avoid-page; }
+  .reveal { opacity: 1; transform: none; }
 }
