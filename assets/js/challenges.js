@@ -16,6 +16,9 @@
  * React challenges:
  *   react: true, starter – the component code; the preview renders the default export.
  *
+ * HTML & CSS challenges:
+ *   html: true, starter – HTML with a <style> block; the preview shows it live as you type.
+ *
  * This file is loaded by the page (for starters) and by the test runner worker (for tests).
  * Functions in the tests must not use variables from outside this file.
  */
@@ -368,6 +371,57 @@
       react: true,
       task: 'Write a `useApi(url)` hook returning `{ data, loading, error, refetch }`. The App below uses it.',
       starter: "import { useCallback, useEffect, useState } from 'react';\n\nfunction useApi(url) {\n  return { data: null, loading: false, error: null, refetch: () => {} };\n}\n\nexport default function App() {\n  const { data, loading, error, refetch } = useApi('https://jsonplaceholder.typicode.com/todos/1');\n  if (loading) return <p>Loading…</p>;\n  if (error) return <p>Error: {String(error.message || error)}</p>;\n  return (\n    <div>\n      <pre>{JSON.stringify(data, null, 2)}</pre>\n      <button onClick={refetch}>Refetch</button>\n    </div>\n  );\n}\n",
+    },
+    // ---------- HTML & CSS (live preview) ----------
+    'hc1': {
+      html: true,
+      task: "Centre the `.box` inside `.stage`, both ways. Then try a second technique.",
+      starter: "<style>\n  .stage {\n    height: 240px;\n    background: #eef2ff;\n    border: 2px dashed #6366f1;\n  }\n  .box {\n    width: 120px;\n    padding: 16px;\n    background: #4f46e5;\n    color: white;\n    text-align: center;\n  }\n</style>\n\n<div class=\"stage\">\n  <div class=\"box\">Centre me</div>\n</div>\n",
+    },
+    'hc2': {
+      html: true,
+      task: "Lay out the page with CSS Grid: header and footer full width, sidebar beside main. Below 600px wide, stack everything in one column. Use the Mobile button to test.",
+      starter: "<style>\n  body { margin: 0; font-family: system-ui, sans-serif; }\n  header, aside, main, footer { padding: 16px; }\n  header { background: #1e293b; color: white; }\n  aside  { background: #e2e8f0; }\n  main   { background: #f8fafc; }\n  footer { background: #cbd5e1; }\n\n  .page {\n    /* your layout here */\n  }\n</style>\n\n<div class=\"page\">\n  <header>Header</header>\n  <aside>Sidebar</aside>\n  <main>Main content</main>\n  <footer>Footer</footer>\n</div>\n",
+    },
+    'hc3': {
+      html: true,
+      task: "Make the cards wrap into as many columns as fit, each at least 180px wide, with equal gaps. No media queries.",
+      starter: "<style>\n  body { font-family: system-ui, sans-serif; }\n  .cards {\n    /* your grid here */\n  }\n  .card {\n    padding: 16px;\n    border: 1px solid #e5e7eb;\n    border-radius: 12px;\n    background: #fff;\n    box-shadow: 0 1px 2px rgb(0 0 0 / .06);\n  }\n</style>\n\n<div class=\"cards\">\n  <div class=\"card\"><h3>One</h3><p>Some text.</p></div>\n  <div class=\"card\"><h3>Two</h3><p>Some longer text that wraps onto a second line.</p></div>\n  <div class=\"card\"><h3>Three</h3><p>Some text.</p></div>\n  <div class=\"card\"><h3>Four</h3><p>Some text.</p></div>\n  <div class=\"card\"><h3>Five</h3><p>Some text.</p></div>\n</div>\n",
+    },
+    'hc4': {
+      html: true,
+      task: "Put the logo on the left and the links on the right with Flexbox. On narrow screens, let the links wrap onto their own line. Give the links clear hover and focus-visible styles.",
+      starter: "<style>\n  body { margin: 0; font-family: system-ui, sans-serif; }\n  .nav {\n    padding: 12px 20px;\n    background: #111827;\n  }\n  .logo { color: white; font-weight: 700; text-decoration: none; }\n  .links { list-style: none; margin: 0; padding: 0; }\n  .links a { color: #d1d5db; text-decoration: none; }\n</style>\n\n<nav class=\"nav\" aria-label=\"Main\">\n  <a class=\"logo\" href=\"#\">Acme</a>\n  <ul class=\"links\">\n    <li><a href=\"#\" aria-current=\"page\">Home</a></li>\n    <li><a href=\"#\">Pricing</a></li>\n    <li><a href=\"#\">Docs</a></li>\n    <li><a href=\"#\">Contact</a></li>\n  </ul>\n</nav>\n",
+    },
+    'hc5': {
+      html: true,
+      task: "Make the title stay on one line with \"…\" at the end, and cut the description off after 3 lines.",
+      starter: "<style>\n  body { font-family: system-ui, sans-serif; }\n  .card { width: 260px; padding: 16px; border: 1px solid #e5e7eb; border-radius: 12px; }\n  .title {\n    margin: 0 0 8px;\n  }\n  .desc {\n    margin: 0;\n    color: #4b5563;\n  }\n</style>\n\n<div class=\"card\">\n  <h3 class=\"title\">A very long product title that does not fit on one line</h3>\n  <p class=\"desc\">This description is far too long for the card. It keeps going for several lines so you can see the clamp working, and it should stop after the third line with an ellipsis instead of pushing the card taller and taller.</p>\n</div>\n",
+    },
+    'hc6': {
+      html: true,
+      task: "Show the tooltip above the button on hover and when the button has keyboard focus. Add a small arrow with a pseudo-element.",
+      starter: "<style>\n  body { font-family: system-ui, sans-serif; padding: 60px 40px; }\n  .tip-wrap { position: relative; display: inline-block; }\n  .tooltip {\n    padding: 6px 10px;\n    border-radius: 6px;\n    background: #111827;\n    color: white;\n    font-size: 13px;\n    white-space: nowrap;\n  }\n</style>\n\n<span class=\"tip-wrap\">\n  <button type=\"button\" aria-describedby=\"tip1\">Save draft</button>\n  <span class=\"tooltip\" role=\"tooltip\" id=\"tip1\">Saved in this browser only</span>\n</span>\n",
+    },
+    'hc7': {
+      html: true,
+      task: "Cover the whole frame with a semi-transparent backdrop, and centre the dialog on top of the page content. Long dialog content should scroll inside the panel.",
+      starter: "<style>\n  body { font-family: system-ui, sans-serif; }\n  .backdrop {\n  }\n  .dialog {\n    padding: 20px;\n    border-radius: 12px;\n    background: white;\n  }\n  .actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; }\n</style>\n\n<h1>Page behind the modal</h1>\n<p>This content should be dimmed by the backdrop.</p>\n\n<div class=\"backdrop\">\n  <div class=\"dialog\" role=\"dialog\" aria-modal=\"true\" aria-labelledby=\"dlg-title\">\n    <h2 id=\"dlg-title\">Delete file?</h2>\n    <p>This can't be undone.</p>\n    <div class=\"actions\">\n      <button type=\"button\">Cancel</button>\n      <button type=\"button\">Delete</button>\n    </div>\n  </div>\n</div>\n",
+    },
+    'hc8': {
+      html: true,
+      task: "Turn `.spinner` into a spinning ring with @keyframes. Slow it right down (or stop it) for people who prefer reduced motion. Keep the text for screen readers.",
+      starter: "<style>\n  body { font-family: system-ui, sans-serif; padding: 24px; }\n  .spinner {\n    width: 40px;\n    height: 40px;\n  }\n  .visually-hidden {\n    position: absolute; width: 1px; height: 1px; overflow: hidden;\n    clip: rect(0 0 0 0); white-space: nowrap;\n  }\n</style>\n\n<div role=\"status\">\n  <div class=\"spinner\" aria-hidden=\"true\"></div>\n  <span class=\"visually-hidden\">Loading…</span>\n</div>\n",
+    },
+    'hc9': {
+      html: true,
+      task: "Make the checkbox look like a toggle switch, but keep the real `<input>` in the page so it works with the keyboard, labels and screen readers. Show a focus ring and a checked state.",
+      starter: "<style>\n  body { font-family: system-ui, sans-serif; padding: 24px; }\n  .switch { display: inline-flex; align-items: center; gap: 10px; cursor: pointer; }\n  .switch input {\n  }\n  .track {\n    width: 44px;\n    height: 24px;\n    border-radius: 999px;\n    background: #d1d5db;\n  }\n</style>\n\n<label class=\"switch\">\n  <input type=\"checkbox\">\n  <span class=\"track\" aria-hidden=\"true\"></span>\n  Email notifications\n</label>\n",
+    },
+    'hc10': {
+      html: true,
+      task: "Keep the header row visible while the table scrolls vertically inside `.table-wrap`, and let the table scroll sideways instead of breaking the layout on narrow screens.",
+      starter: "<style>\n  body { font-family: system-ui, sans-serif; }\n  .table-wrap {\n    max-height: 200px;\n    border: 1px solid #e5e7eb;\n    border-radius: 8px;\n  }\n  table { border-collapse: collapse; width: 100%; }\n  th, td { padding: 8px 12px; text-align: left; border-bottom: 1px solid #e5e7eb; white-space: nowrap; }\n  th { background: #f3f4f6; }\n</style>\n\n<div class=\"table-wrap\">\n  <table>\n    <thead><tr><th>Name</th><th>Role</th><th>Team</th><th>Location</th><th>Start date</th></tr></thead>\n    <tbody>\n      <tr><td>Asha</td><td>Engineer</td><td>Payments</td><td>Pune</td><td>2022-04-01</td></tr>\n      <tr><td>Ben</td><td>Designer</td><td>Growth</td><td>London</td><td>2021-09-15</td></tr>\n      <tr><td>Chen</td><td>Engineer</td><td>Platform</td><td>Singapore</td><td>2023-01-09</td></tr>\n      <tr><td>Dina</td><td>Manager</td><td>Payments</td><td>Berlin</td><td>2020-06-22</td></tr>\n      <tr><td>Eli</td><td>Engineer</td><td>Search</td><td>Toronto</td><td>2024-02-12</td></tr>\n      <tr><td>Fatima</td><td>Analyst</td><td>Growth</td><td>Dubai</td><td>2023-07-03</td></tr>\n      <tr><td>Gopal</td><td>Engineer</td><td>Platform</td><td>Bengaluru</td><td>2022-11-28</td></tr>\n    </tbody>\n  </table>\n</div>\n",
     },
   };
 })(typeof self !== 'undefined' ? self : this);

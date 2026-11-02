@@ -4,12 +4,12 @@
 
 # Frontend Interview Prep
 
-**180 frontend interview questions with clear answers. Practise, check yourself, track your progress and star questions to review later.**
+**228 frontend interview questions with clear answers. Practise, check yourself, track your progress and star questions to review later.**
 
 [**Open the live app →**](https://frontend-interview-prepare.vercel.app)
 
 [![Deployed on Vercel](https://img.shields.io/badge/deployed%20on-Vercel-000?logo=vercel&logoColor=white)](https://frontend-interview-prepare.vercel.app)
-![Questions](https://img.shields.io/badge/questions-180-4f46e5)
+![Questions](https://img.shields.io/badge/questions-228-4f46e5)
 ![No dependencies](https://img.shields.io/badge/dependencies-0-059669)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 
@@ -41,19 +41,19 @@ Questions are grouped into tracks. Most tracks have a **Theory** tab and a **Cod
 | TypeScript | Theory | 4 |
 | React | Theory (88) · Coding (6) | 94 |
 | Next.js | Theory | 8 |
-| HTML & CSS | Coming soon | – |
+| HTML & CSS | Theory (38) · Coding (10) | 48 |
 | System design & behavioural | Architecture (13) · Behavioural (14) | 27 |
 
 ## Features
 
-- **Tracks** – JavaScript, TypeScript, React, Next.js and system design, each with its own page, tabs and progress. The home page shows every track and links back to where you left off.
+- **Tracks** – JavaScript, TypeScript, React, Next.js, HTML & CSS and system design, each with its own page, tabs and progress. The home page shows every track and links back to where you left off.
 - **Progress tracking** – ticks are saved in your browser (`localStorage`); no account needed.
 - **Star for review** – star any question to build your own review list, collected on the **Starred** page. Stars are saved too, and **Reset progress** keeps them.
 - **Search** questions *and* answers, across all tracks from the home page or within a track. Press <kbd>/</kbd> to jump to search, <kbd>Esc</kbd> to clear.
 - **Filters** – All, Remaining, Done and Starred.
 - **Section sidebar** with per-section progress and the current section highlighted.
 - **Light and dark themes**, following your system setting by default.
-- **Code editor** for the coding questions. JavaScript questions have **Run** (shows `console.log` output) and **Check** (runs test cases and shows expected vs. received). React questions render a live preview. Drafts are saved in your browser.
+- **Code editor** for the coding questions. JavaScript questions have **Run** (shows `console.log` output) and **Check** (runs test cases and shows expected vs. received). React questions render a live preview, and HTML & CSS questions show a live preview that updates as you type, with a mobile width option. Drafts are saved in your browser.
 - **Copy buttons** on code examples.
 - **Accessible** – keyboard friendly, proper ARIA states, respects reduced-motion.
 - **Fast and private** – plain HTML, CSS and JavaScript. No build step, no tracking, no third-party requests (except the public test APIs that your own React code calls in the preview).
@@ -90,6 +90,7 @@ The pages load their files from the site root (`/assets/…`), so opening the HT
 │   ├── js/runner.js        # Web Worker that runs JS code and tests (2 s timeout)
 │   ├── js/preview.js       # React preview: compiles JSX and renders it
 │   ├── js/loop-guard.js    # Adds infinite-loop checks to React preview code
+│   ├── js/html-preview.js  # HTML & CSS preview: shows the user's markup and styles
 │   ├── css/preview.css     # Styles inside the React preview
 │   ├── vendor/             # React, ReactDOM and Sucrase (copied in, loaded only by the preview)
 │   ├── favicon.svg         # The logo; the PNG icons and favicon.ico are made from it
@@ -98,6 +99,7 @@ The pages load their files from the site root (`/assets/…`), so opening the HT
 │   └── og-image.png        # Link preview image
 ├── favicon.ico             # 16, 32 and 48 px icon at the site root
 ├── react-preview.html      # Page loaded in a sandboxed iframe for React previews
+├── html-preview.html       # Page loaded in a sandboxed iframe for HTML & CSS previews
 ├── docs/                   # README screenshots
 ├── serve.json              # App page addresses for `npx serve`
 ├── sitemap.xml             # Pages for search engines: /, /app and each track page
@@ -143,12 +145,13 @@ Coding challenges live in [`assets/js/challenges.js`](assets/js/challenges.js), 
 }
 ```
 
-Results are compared deeply, so object key order doesn't matter. For polyfills and timing questions, a test can use `run: (fn, t) => actual` instead of `args`; see the debounce and `myMap` entries for examples. React challenges only need `react: true`, a `task` and `starter` code.
+Results are compared deeply, so object key order doesn't matter. For polyfills and timing questions, a test can use `run: (fn, t) => actual` instead of `args`; see the debounce and `myMap` entries for examples. React challenges only need `react: true`, a `task` and `starter` code. HTML & CSS challenges are the same with `html: true`; the starter is HTML with a `<style>` block.
 
 ### How code runs safely
 
 - **JavaScript** runs in a fresh Web Worker for every run, stopped after 2 seconds, with no network access. Only `runner.js` is allowed to use `new Function` (see `vercel.json`); the main page keeps a strict security policy.
 - **React** code runs in `react-preview.html` inside a sandboxed iframe, so it can't read the page or your saved progress. JSX is compiled by [Sucrase](https://github.com/alangpierce/sucrase).
+- **HTML & CSS** runs in `html-preview.html`, also in a sandboxed iframe. Its security policy allows inline styles but no scripts, and `<script>` tags and `on…` attributes are removed before the markup is shown, so no JavaScript from the editor runs there.
 - **Infinite loops in React code:** after compiling, every `while`, `do…while` and `for(;;)` loop gets a time check (`loop-guard.js`). A loop that runs for over 1 second in one go (a render, a click handler, an effect) throws an error that is shown in the preview. If the preview still stops responding, the editor shuts the frame down after 3 seconds.
 
 ## Contributing

@@ -4,6 +4,8 @@
  * - JavaScript: "Run" shows console output, "Check" runs the tests. Code runs in a
  *   fresh Web Worker (runner.js) that is stopped after 2 seconds.
  * - React: "Run" renders the component in a sandboxed iframe (react-preview.html).
+ * - HTML & CSS: the markup and styles show in a sandboxed iframe (html-preview.html),
+ *   updating as you type. No JavaScript runs there.
  * - Drafts are saved in localStorage.
  */
 (function () {
@@ -279,16 +281,21 @@
     const ed = frames.get(e.source);
     const m = e.data;
     if (!ed || !m || m.source !== 'fip-preview') return;
-    if (m.type === 'ready') { ed.ready = true; startPing(ed); if (ed.pending) { ed.pending = false; sendRender(ed); } }
+    if (m.type === 'ready') { ed.ready = true; if (!ed.html) startPing(ed); if (ed.pending) { ed.pending = false; sendRender(ed); } }
     else if (m.type === 'rendered') clearTimeout(ed.watchdog);
     else if (m.type === 'pong') ed.lastPong = Date.now();
     else if (m.type === 'log') ed.out.log(m.level, m.text);
     else if (m.type === 'error') { clearTimeout(ed.watchdog); ed.out.error(m.text); }
+    else if (m.type === 'note') ed.out.status(m.text, 'ed-muted');
     else if (m.type === 'size') ed.frame.style.height = Math.min(Math.max(m.height, 80), 640) + 'px';
   });
 
   function sendRender(ed) {
     ed.out.clear();
+    if (ed.html) {
+      ed.frame.contentWindow.postMessage({ type: 'render', code: ed.ta.value }, '*');
+      return;
+    }
     clearTimeout(ed.watchdog);
     ed.watchdog = setTimeout(() => killFrame(ed), RENDER_TIMEOUT_MS);
     ed.frame.contentWindow.postMessage({ type: 'render', code: ed.ta.value, theme: theme() }, '*');
@@ -318,17 +325,18 @@
     ed.out.error('The preview stopped responding, so it was shut down. Is there an infinite loop? Fix the code and press Run preview again.');
   }
 
-  function runReact(ed) {
+  function runPreview(ed) {
     if (!ed.frame) {
       const wrap = ed.panel.querySelector('.ed-preview-wrap');
       wrap.classList.remove('hidden');
+      const page = ed.html ? 'html-preview.html' : 'react-preview.html';
       const f = document.createElement('iframe');
-      f.className = 'ed-preview';
-      f.title = 'Preview of your component';
+      f.className = 'ed-preview' + (ed.html ? ' ed-preview-html' : '');
+      f.title = ed.html ? 'Preview of your HTML and CSS' : 'Preview of your component';
       // A sandboxed frame can't load local files, so the sandbox is only used when served over http.
       if (!FROM_DISK) f.setAttribute('sandbox', 'allow-scripts');
-      f.src = FROM_DISK ? 'react-preview.html' : '/react-preview.html';
-      wrap.appendChild(f);
+      f.src = FROM_DISK ? page : '/' + page;
+      (wrap.querySelector('.ed-frame-box') || wrap).appendChild(f);
       ed.frame = f;
       frames.set(f.contentWindow, ed);
       ed.pending = true;
@@ -343,6 +351,8 @@
     const id = li.dataset.id;
     const ch = CH[id];
     const react = !!ch.react;
+    const html = !!ch.html;
+    const preview = react || html;
     const panel = document.createElement('div');
     panel.className = 'editor hidden';
     const n = li.querySelector('.qn').textContent;
@@ -351,21 +361,28 @@
       <textarea class="ed-code" spellcheck="false" autocapitalize="off" autocomplete="off" autocorrect="off"
         aria-label="Code editor for question ${esc(n)}" aria-describedby="ed-hint-${esc(id)}"></textarea>
       <div class="ed-bar">
-        <button type="button" class="btn ed-run${react ? ' btn-primary' : ''}">${react ? 'Run preview' : 'Run'}</button>
-        ${react ? '' : '<button type="button" class="btn btn-primary ed-check">Check</button>'}
+        <button type="button" class="btn ed-run${preview ? ' btn-primary' : ''}">${html ? 'Refresh preview' : react ? 'Run preview' : 'Run'}</button>
+        ${preview ? '' : '<button type="button" class="btn btn-primary ed-check">Check</button>'}
         <button type="button" class="btn ed-reset">Reset code</button>
-        <span class="ed-hint" id="ed-hint-${esc(id)}">${MOD}+Enter to ${react ? 'run' : 'check'} · Esc then Tab to leave the editor</span>
+        <span class="ed-hint" id="ed-hint-${esc(id)}">${html ? 'The preview updates as you type' : `${MOD}+Enter to ${react ? 'run' : 'check'}`} · Esc then Tab to leave the editor</span>
       </div>
       ${react ? '<div class="ed-preview-wrap hidden"></div>' : ''}
+      ${html ? `<div class="ed-preview-wrap ed-html hidden">
+        <div class="seg ed-width" role="group" aria-label="Preview width">
+          <button type="button" class="on" aria-pressed="true" data-w="full">Full width</button>
+          <button type="button" aria-pressed="false" data-w="mobile">Mobile (375px)</button>
+        </div>
+        <div class="ed-frame-box"></div>
+      </div>` : ''}
       <div class="ed-out hidden" aria-live="polite"></div>`;
     li.querySelector('.more').appendChild(panel);
 
     const ta = $('.ed-code', panel);
     const box = $('.ed-out', panel);
     const out = makeOutput(box);
-    if (FROM_DISK && !react) loadRunnerSource().catch(() => {});
-    const ed = { id, li, panel, ta, out, escaped: false, worker: null, timer: null, frame: null, ready: false, pending: false, watchdog: null, ping: null, lastPong: 0 };
-    ed.primary = () => (react ? runReact(ed) : runJS(ed, 'check'));
+    if (FROM_DISK && !preview) loadRunnerSource().catch(() => {});
+    const ed = { id, li, panel, ta, out, html, escaped: false, worker: null, timer: null, frame: null, ready: false, pending: false, watchdog: null, ping: null, lastPong: 0 };
+    ed.primary = () => (preview ? runPreview(ed) : runJS(ed, 'check'));
 
     // An empty draft isn't worth keeping: show the starter code again.
     const blank = v => !v || !v.trim();
@@ -375,10 +392,21 @@
       autoSize(ta);
       if (ta.value === ch.starter || blank(ta.value)) delete drafts[id]; else drafts[id] = ta.value;
       saveDrafts();
+      if (html && ed.frame) {
+        clearTimeout(ed.liveTimer);
+        ed.liveTimer = setTimeout(() => runPreview(ed), 250);
+      }
     });
     ta.addEventListener('blur', () => { ed.escaped = false; });
 
-    $('.ed-run', panel).addEventListener('click', () => (react ? runReact(ed) : runJS(ed, 'run')));
+    $('.ed-run', panel).addEventListener('click', () => (preview ? runPreview(ed) : runJS(ed, 'run')));
+    if (html) {
+      const widthBtns = [...panel.querySelectorAll('.ed-width button')];
+      widthBtns.forEach(b => b.addEventListener('click', () => {
+        widthBtns.forEach(x => { x.classList.toggle('on', x === b); x.setAttribute('aria-pressed', String(x === b)); });
+        $('.ed-frame-box', panel).classList.toggle('mobile', b.dataset.w === 'mobile');
+      }));
+    }
     const checkBtn = $('.ed-check', panel);
     if (checkBtn) checkBtn.addEventListener('click', () => runJS(ed, 'check'));
     $('.ed-reset', panel).addEventListener('click', async () => {
@@ -396,6 +424,7 @@
       saveDrafts();
       autoSize(ta);
       out.clear();
+      if (html && ed.frame) runPreview(ed);
       ta.focus();
     });
     return ed;
@@ -420,7 +449,11 @@
       ed.panel.classList.toggle('hidden', !open);
       btn.setAttribute('aria-expanded', String(open));
       btn.firstChild.textContent = `${open ? 'Hide editor' : (ch.react ? 'Try it in React' : 'Try it')} `;
-      if (open) { autoSize(ed.ta); ed.ta.focus({ preventScroll: true }); }
+      if (open) {
+        autoSize(ed.ta);
+        ed.ta.focus({ preventScroll: true });
+        if (ed.html && !ed.frame) runPreview(ed); // HTML previews show straight away
+      }
       else stop(ed);
     });
   });
