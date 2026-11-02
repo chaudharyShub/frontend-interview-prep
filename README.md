@@ -161,7 +161,7 @@ The site is deployed on [Vercel](https://vercel.com). Every push to `main` goes 
 Frontend Interview Prep is a **Shubham Works** project. Every site shares the same small footer block, so they read as one family.
 
 - [Portfolio](https://shubhamworks.vercel.app/)
-- [CloudPrep](https://cloud-prep-aws.vercel.app/): AWS Cloud Practitioner practice exams
+- [CloudPrep](https://aws-cloud-prepare.vercel.app/): AWS Cloud Practitioner practice exams
 
 ## License
 
