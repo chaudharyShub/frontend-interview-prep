@@ -1,0 +1,111 @@
+/* ==========================================================================
+   Landing page (index.html). Builds on styles.css for colours, nav and footer.
+   ========================================================================== */
+
+.landing .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
+.landing .btn:hover { text-decoration: none; }
+.btn-lg { padding: 11px 20px !important; font-size: 15px !important; font-weight: 600 !important; border-radius: 11px !important; }
+.nav-cta { white-space: nowrap; padding: 7px 14px; }
+@media (max-width: 560px) { .nav-cta { display: none !important; } }
+
+/* ---------- Hero ---------- */
+
+.lp-hero { padding: 64px 0 56px; }
+.lp-hero-inner { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); gap: 48px; align-items: center; }
+.lp-hero h1 { font-size: clamp(32px, 4.6vw, 52px); }
+.lp-hero .lead { font-size: 17.5px; }
+.lp-cta { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 28px; }
+.lp-proof { display: flex; flex-wrap: wrap; gap: 8px 22px; margin: 0; padding: 0; list-style: none; color: var(--text-2); font-size: 14px; }
+.lp-proof strong { color: var(--text); font-weight: 700; }
+
+.lp-shot { margin: 0; }
+.lp-shot img {
+  display: block; width: 100%; height: auto;
+  border: 1px solid var(--line); border-radius: 14px;
+  box-shadow: 0 2px 6px rgb(16 24 40 / .06), 0 24px 48px -12px rgb(16 24 40 / .18);
+}
+.shot-dark { display: none !important; }
+:root[data-theme="dark"] .shot-light { display: none !important; }
+:root[data-theme="dark"] .shot-dark { display: block !important; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .shot-light { display: none !important; }
+  :root:not([data-theme="light"]) .shot-dark { display: block !important; }
+}
+
+@media (max-width: 900px) {
+  .lp-hero { padding: 40px 0 36px; }
+  .lp-hero-inner { grid-template-columns: 1fr; gap: 32px; }
+}
+
+/* ---------- Sections ---------- */
+
+.lp-section { padding: 72px 0; }
+.lp-alt { background: var(--surface-2); border-block: 1px solid var(--line); }
+.lp-h { margin: 0 0 10px; font-size: clamp(24px, 3vw, 32px); line-height: 1.2; letter-spacing: -0.02em; font-weight: 750; }
+.lp-sub { max-width: 640px; margin: 0 0 32px; color: var(--text-2); font-size: 16px; }
+.lp-narrow { max-width: 760px; }
+@media (max-width: 600px) { .lp-section { padding: 52px 0; } }
+
+/* ---------- Tracks ---------- */
+
+.lp-tracks { display: grid; gap: 16px; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); }
+@media (max-width: 380px) { .lp-tracks { grid-template-columns: 1fr; } }
+.lp-track {
+  display: flex; flex-direction: column; gap: 10px; padding: 20px;
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow);
+}
+.lp-track-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.lp-track h3 { margin: 0; font-size: 17px; font-weight: 650; letter-spacing: -0.01em; }
+.lp-track h3 a { color: var(--text); }
+.lp-track h3 a:hover { color: var(--accent-text); }
+.lp-track p { margin: 0; color: var(--text-2); font-size: 14.5px; }
+.lp-count {
+  flex: none; font-size: 12.5px; font-weight: 600; padding: 2px 9px; border-radius: 99px;
+  background: var(--accent-soft); color: var(--accent-text); font-variant-numeric: tabular-nums;
+}
+.lp-count::after { content: " questions"; font-weight: 500; }
+.lp-track ul { margin: 4px 0 0; padding: 12px 0 0; list-style: none; border-top: 1px solid var(--line); display: flex; flex-direction: column; gap: 8px; }
+.lp-track li { font-size: 14px; line-height: 1.45; padding-left: 16px; position: relative; }
+.lp-track li::before { content: "→"; position: absolute; left: 0; color: var(--muted); }
+.lp-track li a { color: var(--text-2); }
+.lp-track li a:hover { color: var(--accent-text); }
+.lp-track-soon { background: transparent; box-shadow: none; border-style: dashed; }
+
+/* ---------- How it works ---------- */
+
+.lp-steps { display: grid; gap: 16px; grid-template-columns: repeat(4, minmax(0, 1fr)); margin: 0; padding: 0; list-style: none; }
+@media (max-width: 900px) { .lp-steps { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 520px) { .lp-steps { grid-template-columns: 1fr; } }
+.lp-steps li { padding: 20px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); }
+.lp-step-n {
+  display: inline-grid; place-items: center; width: 30px; height: 30px; margin-bottom: 12px;
+  border-radius: 9px; background: var(--accent); color: #fff; font-weight: 700; font-size: 14px;
+}
+.lp-steps h3, .lp-feature h3 { margin: 0 0 6px; font-size: 16px; font-weight: 650; }
+.lp-steps p, .lp-feature p { margin: 0; color: var(--text-2); font-size: 14.5px; }
+
+/* ---------- Features ---------- */
+
+.lp-features { display: grid; gap: 28px 32px; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+@media (max-width: 900px) { .lp-features { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 560px) { .lp-features { grid-template-columns: 1fr; } }
+.lp-feature { padding-left: 16px; border-left: 3px solid var(--accent); }
+
+/* ---------- FAQ ---------- */
+
+.lp-faq { display: flex; flex-direction: column; gap: 10px; }
+.lp-faq details { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); }
+.lp-faq summary {
+  cursor: pointer; list-style: none; padding: 16px 20px; font-weight: 600; font-size: 15.5px;
+  display: flex; justify-content: space-between; align-items: center; gap: 12px;
+}
+.lp-faq summary::-webkit-details-marker { display: none; }
+.lp-faq summary::after { content: "+"; flex: none; font-size: 20px; font-weight: 400; color: var(--muted); transition: transform .2s; }
+.lp-faq details[open] summary::after { transform: rotate(45deg); }
+.lp-faq summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: var(--radius); }
+.lp-faq details p { margin: 0; padding: 0 20px 18px; color: var(--text-2); font-size: 15px; }
+
+/* ---------- Closing call to action ---------- */
+
+.lp-final { text-align: center; }
+.lp-final .lp-sub { margin-left: auto; margin-right: auto; }

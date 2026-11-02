@@ -2,38 +2,32 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://frontend-interview-prepare.vercel.app/</loc>
-    <changefreq>monthly</changefreq>
   </url>
   <url>
-    <loc>https://frontend-interview-prepare.vercel.app/javascript</loc>
-    <changefreq>monthly</changefreq>
+    <loc>https://frontend-interview-prepare.vercel.app/app</loc>
   </url>
   <url>
-    <loc>https://frontend-interview-prepare.vercel.app/javascript?tab=coding</loc>
-    <changefreq>monthly</changefreq>
+    <loc>https://frontend-interview-prepare.vercel.app/app/javascript</loc>
   </url>
   <url>
-    <loc>https://frontend-interview-prepare.vercel.app/typescript</loc>
-    <changefreq>monthly</changefreq>
+    <loc>https://frontend-interview-prepare.vercel.app/app/javascript?tab=coding</loc>
   </url>
   <url>
-    <loc>https://frontend-interview-prepare.vercel.app/react</loc>
-    <changefreq>monthly</changefreq>
+    <loc>https://frontend-interview-prepare.vercel.app/app/typescript</loc>
   </url>
   <url>
-    <loc>https://frontend-interview-prepare.vercel.app/react?tab=coding</loc>
-    <changefreq>monthly</changefreq>
+    <loc>https://frontend-interview-prepare.vercel.app/app/react</loc>
   </url>
   <url>
-    <loc>https://frontend-interview-prepare.vercel.app/nextjs</loc>
-    <changefreq>monthly</changefreq>
+    <loc>https://frontend-interview-prepare.vercel.app/app/react?tab=coding</loc>
   </url>
   <url>
-    <loc>https://frontend-interview-prepare.vercel.app/system-design</loc>
-    <changefreq>monthly</changefreq>
+    <loc>https://frontend-interview-prepare.vercel.app/app/nextjs</loc>
   </url>
   <url>
-    <loc>https://frontend-interview-prepare.vercel.app/system-design?tab=behavioural</loc>
-    <changefreq>monthly</changefreq>
+    <loc>https://frontend-interview-prepare.vercel.app/app/system-design</loc>
+  </url>
+  <url>
+    <loc>https://frontend-interview-prepare.vercel.app/app/system-design?tab=behavioural</loc>
   </url>
 </urlset>

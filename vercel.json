@@ -2,8 +2,11 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "cleanUrls": true,
   "trailingSlash": false,
+  "redirects": [
+    { "source": "/:page(javascript|typescript|react|nextjs|html-css|system-design|starred)", "destination": "/app/:page", "permanent": true }
+  ],
   "rewrites": [
-    { "source": "/:page(javascript|typescript|react|nextjs|html-css|system-design|starred)", "destination": "/" }
+    { "source": "/app/:page(javascript|typescript|react|nextjs|html-css|system-design|starred)", "destination": "/app" }
   ],
   "headers": [
     {
