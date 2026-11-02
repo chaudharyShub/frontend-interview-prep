@@ -96,22 +96,25 @@
   const label = t => t.short || t.title;
 
   // ---------- Routing ----------
-  // Over http: /react, /react?tab=coding, /starred (Vercel rewrites these to index.html).
-  // From disk:  index.html?track=react&tab=coding. `?track=` also works over http.
+  // The app lives under /app (the site's home page is the landing page, index.html).
+  // Over http: /app, /app/react, /app/react?tab=coding, /app/starred (Vercel rewrites these to app.html).
+  // From disk:  app.html?track=react&tab=coding. `?track=` also works over http.
   function link(track, tab, hash) {
     let url;
-    if (FROM_DISK) url = 'index.html' + (track ? `?track=${track}${tab ? `&tab=${tab}` : ''}` : '');
-    else url = track ? `${track}${tab ? `?tab=${tab}` : ''}` : './';
+    if (FROM_DISK) url = 'app.html' + (track ? `?track=${track}${tab ? `&tab=${tab}` : ''}` : '');
+    else url = '/app' + (track ? `/${track}${tab ? `?tab=${tab}` : ''}` : '');
     return url + (hash ? `#${hash}` : '');
   }
   const params = new URLSearchParams(location.search);
   let slug = params.get('track') || '';
-  if (!slug && !FROM_DISK) slug = decodeURIComponent(location.pathname.split('/').filter(Boolean).pop() || '');
+  if (!slug && !FROM_DISK) slug = decodeURIComponent(location.pathname.split('/').filter(Boolean)[1] || '');
   const track = TRACKS.find(t => t.slug === slug) || null;
   const view = slug === 'starred' ? 'starred' : track ? 'track' : 'home';
   const tab = track ? (track.tabs.find(t => t.slug === params.get('tab')) || track.tabs[0] || null) : null;
 
   // ---------- Page meta (title, description, canonical) ----------
+  // Full URL of an app page on the live site, e.g. ('react?tab=coding') -> https://…/app/react?tab=coding.
+  const appUrl = (siteUrl, path) => new URL('/app' + (path ? `/${path}` : ''), siteUrl).href;
   function setMeta(title, description, path) {
     document.title = title;
     const set = (sel, attr, v) => { const el = $(sel); if (el) el.setAttribute(attr, v); };
@@ -120,7 +123,7 @@
     set('meta[property="og:description"]', 'content', description);
     const canonical = $('link[rel="canonical"]');
     if (canonical) {
-      const url = new URL(path, canonical.href).href;
+      const url = appUrl(canonical.href, path);
       canonical.href = url;
       set('meta[property="og:url"]', 'content', url);
     }
@@ -139,7 +142,6 @@
 
     const canonical = $('link[rel="canonical"]');
     if (!canonical) return;
-    const site = new URL('./', canonical.href);
     const data = document.createElement('script');
     data.type = 'application/ld+json';
     data.textContent = JSON.stringify({
@@ -149,7 +151,7 @@
         '@type': 'ListItem',
         position: i + 1,
         name: c.name,
-        item: new URL(c.path, site).href,
+        item: appUrl(canonical.href, c.path),
       })),
     });
     document.head.appendChild(data);
@@ -332,6 +334,7 @@
   // =====================================================================
   function renderList() {
     $('#trackView').classList.remove('hidden');
+    $('#homeView').classList.add('hidden'); // shown by default so search engines can read the track list
     let sections, scope, scopeIds;
 
     if (view === 'track') {
@@ -342,7 +345,7 @@
         `${track.title} interview questions${tab && track.tabs.length > 1 ? ` – ${tab.title}` : ''} – Frontend Interview Prep`,
         track.description,
         track.slug + (isFirst ? '' : `?tab=${tab.slug}`));
-      const crumbs = [{ name: 'Home', href: link(), path: '' }];
+      const crumbs = [{ name: 'All tracks', href: link(), path: '' }];
       if (tab && track.tabs.length > 1) {
         crumbs.push({ name: track.title, href: link(track.slug), path: track.slug });
         crumbs.push({ name: tab.title, path: track.slug + (isFirst ? '' : `?tab=${tab.slug}`) });
@@ -372,7 +375,7 @@
       }
     } else {
       setMeta('Starred questions – Frontend Interview Prep', 'Your starred frontend interview questions, from every track.', 'starred');
-      setBreadcrumbs([{ name: 'Home', href: link(), path: '' }, { name: 'Starred', path: 'starred' }]);
+      setBreadcrumbs([{ name: 'All tracks', href: link(), path: '' }, { name: 'Starred', path: 'starred' }]);
       $('#heroTitle').textContent = 'Starred questions';
       $('#heroLead').textContent = 'Every question you starred, from all tracks. Unstar a question once you can answer it confidently.';
       $('#tocTitle').textContent = 'Tracks';

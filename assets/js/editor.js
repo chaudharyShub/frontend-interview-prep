@@ -146,7 +146,7 @@
   }
   function startWorker(out) {
     try {
-      if (!FROM_DISK) return new Worker('assets/js/runner.js');
+      if (!FROM_DISK) return new Worker('/assets/js/runner.js');
       if (!blobUrl) {
         const src = `(${window.defineChallenges})(self);
 (${window.fipRunner})();
@@ -327,7 +327,7 @@
       f.title = 'Preview of your component';
       // A sandboxed frame can't load local files, so the sandbox is only used when served over http.
       if (!FROM_DISK) f.setAttribute('sandbox', 'allow-scripts');
-      f.src = 'react-preview.html';
+      f.src = FROM_DISK ? 'react-preview.html' : '/react-preview.html';
       wrap.appendChild(f);
       ed.frame = f;
       frames.set(f.contentWindow, ed);

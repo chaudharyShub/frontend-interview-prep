@@ -2,32 +2,8 @@
   "cleanUrls": true,
   "rewrites": [
     {
-      "source": "/javascript",
-      "destination": "/"
-    },
-    {
-      "source": "/typescript",
-      "destination": "/"
-    },
-    {
-      "source": "/react",
-      "destination": "/"
-    },
-    {
-      "source": "/nextjs",
-      "destination": "/"
-    },
-    {
-      "source": "/html-css",
-      "destination": "/"
-    },
-    {
-      "source": "/system-design",
-      "destination": "/"
-    },
-    {
-      "source": "/starred",
-      "destination": "/"
+      "source": "/app/:page",
+      "destination": "/app.html"
     }
   ]
 }

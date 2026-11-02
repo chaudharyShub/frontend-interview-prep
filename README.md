@@ -60,7 +60,7 @@ Questions are grouped into tracks. Most tracks have a **Theory** tab and a **Cod
 
 ## Run locally
 
-No install needed. Clone the repo and either open `index.html` directly or serve the folder:
+No install needed. Clone the repo and serve the folder:
 
 ```bash
 git clone https://github.com/chaudharyShub/frontend-interview-prep.git
@@ -68,17 +68,20 @@ cd frontend-interview-prep
 npx serve .
 ```
 
-`npx serve` reads `serve.json`, so track pages like `/react` work. Other servers (e.g. `python -m http.server`) don't know those addresses; use `/?track=react` there, or open the file directly.
+Then open `http://localhost:3000` for the landing page, or `/app` for the checklist. `npx serve` reads `serve.json`, so track pages like `/app/react` work. Other servers (e.g. `python -m http.server`) don't know those addresses; use `/app.html?track=react` there.
 
-The code editor works either way. Opened as a file, it runs with slightly looser isolation (no network block in the JS runner, no sandbox on the React preview), which is fine for running your own code locally.
+The pages load their files from the site root (`/assets/…`), so opening the HTML files directly from disk no longer works.
 
 ## Project structure
 
 ```
 .
-├── index.html              # Page markup and meta tags
+├── index.html              # Landing page at / (static, written for search engines)
+├── app.html                # The checklist app at /app, /app/react, /app/starred …
 ├── assets/
 │   ├── css/styles.css      # All styles (light + dark themes)
+│   ├── css/landing.css     # Extra styles for the landing page
+│   ├── js/landing.js       # Theme toggle on the landing page
 │   ├── js/tracks/          # Question bank, one file per track – edit these to add questions
 │   ├── js/app.js           # Routing, home page, rendering, search, filters, progress
 │   ├── js/theme.js         # Applies the saved theme before first paint
@@ -93,8 +96,9 @@ The code editor works either way. Opened as a file, it runs with slightly looser
 │   └── og-image.png        # Link preview image
 ├── react-preview.html      # Page loaded in a sandboxed iframe for React previews
 ├── docs/                   # README screenshots
-├── serve.json              # Track page addresses for `npx serve`
-└── vercel.json             # Track page addresses, security headers and caching
+├── serve.json              # App page addresses for `npx serve`
+├── sitemap.xml             # Pages for search engines: /, /app and each track page
+└── vercel.json             # App page addresses, redirects from the old /react-style URLs, security headers and caching
 ```
 
 ## Adding or editing questions
@@ -118,7 +122,7 @@ Optional fields:
 
 Question numbers are worked out from the order in each tab. Never change the `id` of an existing question, or people will lose their progress and stars for it. Moving a question to another track or tab is fine.
 
-To add a track, create a file in `assets/js/tracks/`, add a `<script>` tag for it in `index.html`, and add its slug to the rewrites in `vercel.json` and `serve.json`.
+To add a track, create a file in `assets/js/tracks/`, add a `<script>` tag for it in `app.html`, and add its slug to the redirect and rewrite in `vercel.json`. The landing page (`index.html`) and the plain track list in `app.html` are written by hand, so update their track cards and question counts too.
 
 ## Adding a coding challenge
 
