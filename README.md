@@ -92,8 +92,11 @@ The pages load their files from the site root (`/assets/…`), so opening the HT
 │   ├── js/loop-guard.js    # Adds infinite-loop checks to React preview code
 │   ├── css/preview.css     # Styles inside the React preview
 │   ├── vendor/             # React, ReactDOM and Sucrase (copied in, loaded only by the preview)
-│   ├── favicon.svg
+│   ├── favicon.svg         # The logo; the PNG icons and favicon.ico are made from it
+│   ├── favicon-192.png     # Icon for Google search results
+│   ├── apple-touch-icon.png
 │   └── og-image.png        # Link preview image
+├── favicon.ico             # 16, 32 and 48 px icon at the site root
 ├── react-preview.html      # Page loaded in a sandboxed iframe for React previews
 ├── docs/                   # README screenshots
 ├── serve.json              # App page addresses for `npx serve`
