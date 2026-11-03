@@ -6,7 +6,7 @@
 //
 // Bump VERSION when the PRECACHE list changes; old caches are deleted on activate.
 
-const VERSION = 'fip-v1';
+const VERSION = 'fip-v2';
 
 const PRECACHE = [
   '/',
@@ -30,6 +30,7 @@ const PRECACHE = [
   '/assets/js/challenges.js',
   '/assets/js/editor.js',
   '/assets/js/runner.js',
+  '/assets/vendor/sucrase-3.35.1.min.js',
 ];
 
 self.addEventListener('install', (event) => {
