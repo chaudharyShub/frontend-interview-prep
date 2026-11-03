@@ -54,6 +54,7 @@ Questions are grouped into tracks. Most tracks have a **Theory** tab and a **Cod
 - **Section sidebar** with per-section progress and the current section highlighted.
 - **Light and dark themes**, following your system setting by default.
 - **Code editor** for the coding questions. JavaScript questions have **Run** (shows `console.log` output) and **Check** (runs test cases and shows expected vs. received). React questions render a live preview, and HTML & CSS questions show a live preview that updates as you type, with a mobile width option. Drafts are saved in your browser.
+- **Installable and works offline** – install it from the browser's address bar (or "Add to Home Screen" on a phone). Questions, answers and the JavaScript runner work without a connection.
 - **Copy buttons** on code examples.
 - **Accessible** – keyboard friendly, proper ARIA states, respects reduced-motion.
 - **Fast and private** – plain HTML, CSS and JavaScript. No build step, no tracking, no third-party requests (except the public test APIs that your own React code calls in the preview).
@@ -94,10 +95,15 @@ The pages load their files from the site root (`/assets/…`), so opening the HT
 │   ├── css/preview.css     # Styles inside the React preview
 │   ├── vendor/             # React, ReactDOM and Sucrase (copied in, loaded only by the preview)
 │   ├── favicon.svg         # The logo; the PNG icons and favicon.ico are made from it
-│   ├── favicon-192.png     # Icon for Google search results
+│   ├── favicon-192.png     # Icon for Google search results and the installed app
+│   ├── icon-512.png        # Installed-app icons (the maskable one has no rounded corners)
+│   ├── icon-maskable-512.png
+│   ├── js/pwa.js           # Registers the service worker
 │   ├── apple-touch-icon.png
 │   └── og-image.png        # Link preview image
 ├── favicon.ico             # 16, 32 and 48 px icon at the site root
+├── manifest.webmanifest    # Makes the app installable (name, icons, start page)
+├── sw.js                   # Service worker: network first, saved copies when offline
 ├── react-preview.html      # Page loaded in a sandboxed iframe for React previews
 ├── html-preview.html       # Page loaded in a sandboxed iframe for HTML & CSS previews
 ├── docs/                   # README screenshots
