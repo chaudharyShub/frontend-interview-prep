@@ -13,6 +13,10 @@
  *              `expected` may be a function, e.g. to compare against a built-in method.
  *              `t` has helpers: t.clock.tick(ms), t.throws(fn) → error name or 'no error'.
  *
+ * TypeScript challenges:
+ *   ts: true, plus the same fields as JavaScript. The editor removes the types (Sucrase)
+ *   before the code runs, so the tests see plain JavaScript. Types aren't checked.
+ *
  * React challenges:
  *   react: true, starter – the component code; the preview renders the default export.
  *
@@ -422,6 +426,94 @@
       html: true,
       task: "Keep the header row visible while the table scrolls vertically inside `.table-wrap`, and let the table scroll sideways instead of breaking the layout on narrow screens.",
       starter: "<style>\n  body { font-family: system-ui, sans-serif; }\n  .table-wrap {\n    max-height: 200px;\n    border: 1px solid #e5e7eb;\n    border-radius: 8px;\n  }\n  table { border-collapse: collapse; width: 100%; }\n  th, td { padding: 8px 12px; text-align: left; border-bottom: 1px solid #e5e7eb; white-space: nowrap; }\n  th { background: #f3f4f6; }\n</style>\n\n<div class=\"table-wrap\">\n  <table>\n    <thead><tr><th>Name</th><th>Role</th><th>Team</th><th>Location</th><th>Start date</th></tr></thead>\n    <tbody>\n      <tr><td>Asha</td><td>Engineer</td><td>Payments</td><td>Pune</td><td>2022-04-01</td></tr>\n      <tr><td>Ben</td><td>Designer</td><td>Growth</td><td>London</td><td>2021-09-15</td></tr>\n      <tr><td>Chen</td><td>Engineer</td><td>Platform</td><td>Singapore</td><td>2023-01-09</td></tr>\n      <tr><td>Dina</td><td>Manager</td><td>Payments</td><td>Berlin</td><td>2020-06-22</td></tr>\n      <tr><td>Eli</td><td>Engineer</td><td>Search</td><td>Toronto</td><td>2024-02-12</td></tr>\n      <tr><td>Fatima</td><td>Analyst</td><td>Growth</td><td>Dubai</td><td>2023-07-03</td></tr>\n      <tr><td>Gopal</td><td>Engineer</td><td>Platform</td><td>Bengaluru</td><td>2022-11-28</td></tr>\n    </tbody>\n  </table>\n</div>\n",
+    },
+    // ---------- TypeScript coding (types are removed before the code runs) ----------
+    'tc1': {
+      ts: true,
+      fn: 'groupBy',
+      task: 'Write `groupBy(items, getKey)`. Return an object whose keys are the results of `getKey`, each holding the items with that key, in their original order. An empty array returns `{}`.',
+      starter: "function groupBy<T, K extends PropertyKey>(items: readonly T[], getKey: (item: T) => K): Partial<Record<K, T[]>> {\n  \n}\n\ntype Person = { name: string; team: 'web' | 'api' };\nconst people: Person[] = [\n  { name: 'Ana', team: 'web' },\n  { name: 'Ben', team: 'api' },\n  { name: 'Cy', team: 'web' },\n];\nconsole.log(groupBy(people, p => p.team));\n",
+      tests: [
+        { name: 'groups people by team', run: fn => fn([{ n: 'Ana', t: 'web' }, { n: 'Ben', t: 'api' }, { n: 'Cy', t: 'web' }], p => p.t), expected: { web: [{ n: 'Ana', t: 'web' }, { n: 'Cy', t: 'web' }], api: [{ n: 'Ben', t: 'api' }] } },
+        { name: 'empty array gives {}', run: fn => fn([], x => x), expected: {} },
+        { name: 'numbers by parity', run: fn => fn([1, 2, 3, 4, 5], n => (n % 2 ? 'odd' : 'even')), expected: { odd: [1, 3, 5], even: [2, 4] } },
+        { name: 'number keys', run: fn => fn(['a', 'bb', 'cc', 'ddd'], s => s.length), expected: { 1: ['a'], 2: ['bb', 'cc'], 3: ['ddd'] } },
+        { name: 'does not change the input', run: fn => { const a = [1, 2]; fn(a, n => n); return a; }, expected: [1, 2] },
+      ],
+    },
+    'tc2': {
+      ts: true,
+      fn: 'isUser',
+      task: 'Write `isUser(value: unknown): value is User`. Return `true` only for a plain object with a number `id`, string `name` and `email`, and a `roles` array that contains only strings. Anything else returns `false`.',
+      starter: "type User = {\n  id: number;\n  name: string;\n  email: string;\n  roles: string[];\n};\n\nfunction isUser(value: unknown): value is User {\n  \n}\n\nconsole.log(isUser({ id: 1, name: 'Ana', email: 'ana@example.com', roles: ['admin'] }));\nconsole.log(isUser(null));\n",
+      tests: [
+        { args: [{ id: 1, name: 'Ana', email: 'ana@example.com', roles: ['admin'] }], expected: true },
+        { args: [{ id: 2, name: 'Ben', email: 'ben@example.com', roles: [] }], expected: true },
+        { args: [null], expected: false },
+        { args: [[]], expected: false },
+        { args: ['user'], expected: false },
+        { args: [{ id: '1', name: 'Ana', email: 'ana@example.com', roles: [] }], expected: false },
+        { args: [{ id: 1, name: 'Ana', roles: [] }], expected: false },
+        { args: [{ id: 1, name: 'Ana', email: 'ana@example.com', roles: ['admin', 7] }], expected: false },
+        { args: [{ id: 1, name: 'Ana', email: 'ana@example.com', roles: 'admin' }], expected: false },
+      ],
+    },
+    'tc3': {
+      ts: true,
+      fn: 'area',
+      task: 'Write `area(shape)` for circles, squares and rectangles. Use a `switch` on `shape.kind`, and in the `default` branch throw an `Error` (using a `never` check) so an unknown kind fails loudly.',
+      starter: "type Shape =\n  | { kind: 'circle'; radius: number }\n  | { kind: 'square'; size: number }\n  | { kind: 'rectangle'; width: number; height: number };\n\nfunction area(shape: Shape): number {\n  \n}\n\nconsole.log(area({ kind: 'rectangle', width: 2, height: 3 }));\n",
+      tests: [
+        { args: [{ kind: 'circle', radius: 1 }], expected: () => Math.PI },
+        { args: [{ kind: 'circle', radius: 2 }], expected: () => Math.PI * 4 },
+        { args: [{ kind: 'square', size: 3 }], expected: 9 },
+        { args: [{ kind: 'rectangle', width: 2, height: 3 }], expected: 6 },
+        { args: [{ kind: 'square', size: 0 }], expected: 0 },
+        { name: 'throws for an unknown kind', run: (fn, t) => t.throws(() => fn({ kind: 'triangle', base: 2, height: 3 })), expected: 'Error' },
+      ],
+    },
+    'tc4': {
+      ts: true,
+      fn: 'pick',
+      task: "Write `pick(obj, keys)`. Return a new object with only the given keys. Skip keys the object doesn't have, and don't change the original.",
+      starter: "function pick<T extends object, K extends keyof T>(obj: T, keys: readonly K[]): Pick<T, K> {\n  \n}\n\nconst user = { id: 1, name: 'Ana', email: 'ana@example.com', password: 'secret' };\nconsole.log(pick(user, ['id', 'name']));\n",
+      tests: [
+        { args: [{ id: 1, name: 'Ana', email: 'ana@example.com', password: 'secret' }, ['id', 'name']], expected: { id: 1, name: 'Ana' } },
+        { args: [{ a: 1, b: 2 }, []], expected: {} },
+        { args: [{ a: 1, b: 2 }, ['b']], expected: { b: 2 } },
+        { args: [{ a: 1, b: undefined }, ['b']], expected: { b: undefined } },
+        { args: [{ a: 1 }, ['a', 'missing']], expected: { a: 1 } },
+        { name: 'does not change the original', run: fn => { const o = { a: 1, b: 2 }; fn(o, ['a']); return o; }, expected: { a: 1, b: 2 } },
+      ],
+    },
+    'tc5': {
+      ts: true,
+      fn: 'createEmitter',
+      task: 'Write `createEmitter()`, returning `{ on, off, emit }`. `on(event, handler)` returns a function that unsubscribes. `emit(event, payload)` calls every handler for that event, in the order they were added. Adding the same handler twice should only call it once.',
+      starter: "type Handler<T> = (payload: T) => void;\n\nfunction createEmitter<E extends Record<string, unknown>>() {\n  function on<K extends keyof E>(event: K, handler: Handler<E[K]>): () => void {\n    \n  }\n\n  function off<K extends keyof E>(event: K, handler: Handler<E[K]>): void {\n    \n  }\n\n  function emit<K extends keyof E>(event: K, payload: E[K]): void {\n    \n  }\n\n  return { on, off, emit };\n}\n\ntype Events = { login: { userId: string }; logout: undefined };\nconst emitter = createEmitter<Events>();\nconst unsubscribe = emitter.on('login', e => console.log('logged in', e.userId));\nemitter.emit('login', { userId: 'u1' });\nunsubscribe();\nemitter.emit('login', { userId: 'u2' }); // nothing logged\n",
+      tests: [
+        { name: 'emit calls the handler with the payload', run: fn => { const e = fn(); const got = []; e.on('a', p => got.push(p)); e.emit('a', 1); return got; }, expected: [1] },
+        { name: 'handlers run in the order they were added', run: fn => { const e = fn(); const got = []; e.on('a', () => got.push(1)); e.on('a', () => got.push(2)); e.emit('a'); return got; }, expected: [1, 2] },
+        { name: 'events are separate', run: fn => { const e = fn(); const got = []; e.on('a', () => got.push('a')); e.on('b', () => got.push('b')); e.emit('b'); return got; }, expected: ['b'] },
+        { name: 'emit with no handlers does nothing', run: fn => { const e = fn(); e.emit('none', 1); return 'ok'; }, expected: 'ok' },
+        { name: 'on returns an unsubscribe function', run: fn => { const e = fn(); let n = 0; const un = e.on('a', () => n++); e.emit('a'); un(); e.emit('a'); return n; }, expected: 1 },
+        { name: 'off removes a handler', run: fn => { const e = fn(); let n = 0; const h = () => n++; e.on('a', h); e.off('a', h); e.emit('a'); return n; }, expected: 0 },
+        { name: 'the same handler is only called once', run: fn => { const e = fn(); let n = 0; const h = () => n++; e.on('a', h); e.on('a', h); e.emit('a'); return n; }, expected: 1 },
+        { name: 'a handler can unsubscribe while emitting', run: fn => { const e = fn(); const got = []; const un = e.on('a', () => { got.push(1); un(); }); e.on('a', () => got.push(2)); e.emit('a'); e.emit('a'); return got; }, expected: [1, 2, 2] },
+      ],
+    },
+    'tc6': {
+      ts: true,
+      fn: 'retry',
+      task: 'Write `retry(fn, { attempts })`. Call the async `fn`; if it rejects, try again, up to `attempts` calls in total. Resolve with the first successful result, or reject with the **last** error if every attempt fails.',
+      starter: "type RetryOptions = { attempts: number; delayMs?: number };\n\nasync function retry<T>(fn: () => Promise<T>, { attempts, delayMs = 0 }: RetryOptions): Promise<T> {\n  \n}\n\nlet calls = 0;\nconst flaky = async () => {\n  calls++;\n  if (calls < 3) throw new Error('Network error ' + calls);\n  return 'ok on call ' + calls;\n};\nretry(flaky, { attempts: 5 }).then(console.log, console.error);\n",
+      tests: [
+        { name: 'resolves on the first try', run: fn => fn(async () => 42, { attempts: 3 }), expected: 42 },
+        { name: 'retries until it succeeds', run: async fn => { let n = 0; const v = await fn(async () => { n++; if (n < 3) throw new Error('fail'); return 'done'; }, { attempts: 5 }); return [v, n]; }, expected: ['done', 3] },
+        { name: 'rejects with the last error', run: async fn => { let n = 0; try { await fn(async () => { n++; throw new Error('fail ' + n); }, { attempts: 3 }); return 'resolved'; } catch (e) { return e.message; } }, expected: 'fail 3' },
+        { name: 'makes exactly `attempts` calls', run: async fn => { let n = 0; try { await fn(async () => { n++; throw new Error('x'); }, { attempts: 4 }); } catch (e) { /* expected */ } return n; }, expected: 4 },
+        { name: 'stops calling after a success', run: async fn => { let n = 0; await fn(async () => { n++; return n; }, { attempts: 5 }); return n; }, expected: 1 },
+      ],
     },
   };
 })(typeof self !== 'undefined' ? self : this);

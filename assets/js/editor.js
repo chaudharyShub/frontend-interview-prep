@@ -3,6 +3,7 @@
  *
  * - JavaScript: "Run" shows console output, "Check" runs the tests. Code runs in a
  *   fresh Web Worker (runner.js) that is stopped after 2 seconds.
+ * - TypeScript: the same, after Sucrase removes the types in the page. Types aren't checked.
  * - React: "Run" renders the component in a sandboxed iframe (react-preview.html).
  * - HTML & CSS: the markup and styles show in a sandboxed iframe (html-preview.html),
  *   updating as you type. No JavaScript runs there.
@@ -162,6 +163,30 @@
     }
   }
 
+  // ---------- TypeScript ----------
+  // Sucrase (about 200 KB) is only loaded the first time someone runs TypeScript.
+  // It removes the types and keeps line numbers, so error lines still match the editor.
+  let sucraseLoad = null;
+  function loadSucrase() {
+    if (!sucraseLoad) {
+      sucraseLoad = new Promise((resolve, reject) => {
+        const s = document.createElement('script');
+        s.src = (FROM_DISK ? '' : '/') + 'assets/vendor/sucrase-3.35.1.min.js';
+        s.onload = resolve;
+        s.onerror = () => { sucraseLoad = null; reject(new Error("Couldn't load the TypeScript compiler. Check your connection and try again.")); };
+        document.head.appendChild(s);
+      });
+    }
+    return sucraseLoad;
+  }
+  function stripTypes(code) {
+    try {
+      return { code: window.Sucrase.transform(code, { transforms: ['typescript'], disableESTransforms: true }).code };
+    } catch (e) {
+      return { error: `${e.name || 'SyntaxError'}: ${e.message}` };
+    }
+  }
+
   function runJS(ed, mode) {
     stop(ed);
     if (FROM_DISK && !window.fipRunner) {
@@ -169,13 +194,25 @@
       return;
     }
     const { out, id } = ed;
+    const ch = CH[id];
+    if (ch.ts && !window.Sucrase) {
+      out.clear();
+      out.status('Loading the TypeScript compiler…', 'ed-muted');
+      loadSucrase().then(() => runJS(ed, mode), e => { out.clear(); out.error(e.message); });
+      return;
+    }
     out.clear();
+    let code = ed.ta.value;
+    if (ch.ts) {
+      const res = stripTypes(code);
+      if (res.error) { out.error(res.error); return; }
+      code = res.code;
+    }
     const worker = startWorker(out);
     if (!worker) return;
     ed.worker = worker;
     setBusy(ed, true);
 
-    const ch = CH[id];
     const tests = mode === 'check' ? ch.tests : [];
     const rows = [];
     let ran = false, current = -1, currentName = '', passed = 0, done = false;
@@ -257,7 +294,7 @@
       finish();
     }, TIMEOUT_MS);
 
-    worker.postMessage({ mode, id, code: ed.ta.value });
+    worker.postMessage({ mode, id, code });
   }
 
   function stop(ed) {
@@ -364,7 +401,7 @@
         <button type="button" class="btn ed-run${preview ? ' btn-primary' : ''}">${html ? 'Refresh preview' : react ? 'Run preview' : 'Run'}</button>
         ${preview ? '' : '<button type="button" class="btn btn-primary ed-check">Check</button>'}
         <button type="button" class="btn ed-reset">Reset code</button>
-        <span class="ed-hint" id="ed-hint-${esc(id)}">${html ? 'The preview updates as you type' : `${MOD}+Enter to ${react ? 'run' : 'check'}`} · Esc then Tab to leave the editor</span>
+        <span class="ed-hint" id="ed-hint-${esc(id)}">${html ? 'The preview updates as you type' : `${MOD}+Enter to ${react ? 'run' : 'check'}`}${ch.ts ? ' · Types are removed before running, not checked' : ''} · Esc then Tab to leave the editor</span>
       </div>
       ${react ? '<div class="ed-preview-wrap hidden"></div>' : ''}
       ${html ? `<div class="ed-preview-wrap ed-html hidden">
@@ -381,6 +418,7 @@
     const box = $('.ed-out', panel);
     const out = makeOutput(box);
     if (FROM_DISK && !preview) loadRunnerSource().catch(() => {});
+    if (ch.ts) loadSucrase().catch(() => {});
     const ed = { id, li, panel, ta, out, html, escaped: false, worker: null, timer: null, frame: null, ready: false, pending: false, watchdog: null, ping: null, lastPong: 0 };
     ed.primary = () => (preview ? runPreview(ed) : runJS(ed, 'check'));
 
