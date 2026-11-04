@@ -376,6 +376,76 @@
       task: 'Write a `useApi(url)` hook returning `{ data, loading, error, refetch }`. The App below uses it.',
       starter: "import { useCallback, useEffect, useState } from 'react';\n\nfunction useApi(url) {\n  return { data: null, loading: false, error: null, refetch: () => {} };\n}\n\nexport default function App() {\n  const { data, loading, error, refetch } = useApi('https://jsonplaceholder.typicode.com/todos/1');\n  if (loading) return <p>Loading…</p>;\n  if (error) return <p>Error: {String(error.message || error)}</p>;\n  return (\n    <div>\n      <pre>{JSON.stringify(data, null, 2)}</pre>\n      <button onClick={refetch}>Refetch</button>\n    </div>\n  );\n}\n",
     },
+    'm7': {
+      react: true,
+      task: "Add todos with a form, tick them off, delete them, and filter by All / Active / Done. Show how many are left.",
+      starter: "import { useState } from 'react';\n\nexport default function TodoApp() {\n  const [todos, setTodos] = useState([]);\n\n  return (\n    <div>\n      <form>\n        <input placeholder=\"What needs doing?\" />\n        <button>Add</button>\n      </form>\n      <ul>\n        {todos.map(t => <li key={t.id}>{t.title}</li>)}\n      </ul>\n    </div>\n  );\n}\n",
+    },
+    'm8': {
+      react: true,
+      task: "Show a list of sections where clicking a title opens its panel. Only one panel is open at a time; add an `allowMultiple` prop that lets several stay open.",
+      starter: "import { useState } from 'react';\n\nconst ITEMS = [\n  { title: 'What is React?', content: 'A library for building user interfaces from components.' },\n  { title: 'What is JSX?', content: 'A syntax that looks like HTML and compiles to React.createElement calls.' },\n  { title: 'What is a hook?', content: 'A function like useState that lets components use React features.' },\n];\n\nfunction Accordion({ items }) {\n  return (\n    <div>\n      {items.map(item => (\n        <div key={item.title}>\n          <button>{item.title}</button>\n          <p>{item.content}</p>\n        </div>\n      ))}\n    </div>\n  );\n}\n\nexport default function App() {\n  return <Accordion items={ITEMS} />;\n}\n",
+    },
+    'm9': {
+      react: true,
+      task: "Show tab buttons and the panel for the selected tab. Arrow Left / Right (and Home / End) should move between tabs, and screen readers should know which tab is selected.",
+      starter: "import { useState } from 'react';\n\nconst TABS = [\n  { label: 'Profile', content: 'Your name and photo.' },\n  { label: 'Settings', content: 'Theme and language.' },\n  { label: 'Billing', content: 'Plan and invoices.' },\n];\n\nfunction Tabs({ tabs }) {\n  return (\n    <div>\n      <div>\n        {tabs.map(t => <button key={t.label}>{t.label}</button>)}\n      </div>\n      <p>{tabs[0].content}</p>\n    </div>\n  );\n}\n\nexport default function App() {\n  return <Tabs tabs={TABS} />;\n}\n",
+    },
+    'm10': {
+      react: true,
+      task: "Open a modal from a button. Close it with Escape, a click on the dark backdrop, or a Close button. Render it with a portal.",
+      starter: "import { useEffect, useRef, useState } from 'react';\nimport { createPortal } from 'react-dom';\n\nfunction Modal({ open, onClose, title, children }) {\n  if (!open) return null;\n  return (\n    <div>\n      <h2>{title}</h2>\n      {children}\n      <button onClick={onClose}>Close</button>\n    </div>\n  );\n}\n\nexport default function App() {\n  const [open, setOpen] = useState(false);\n  return (\n    <div>\n      <button onClick={() => setOpen(true)}>Open modal</button>\n      <Modal open={open} onClose={() => setOpen(false)} title=\"Delete file?\">\n        <p>Are you sure?</p>\n      </Modal>\n    </div>\n  );\n}\n",
+    },
+    'm11': {
+      react: true,
+      task: "Show 5 stars. Hovering previews a rating, clicking sets it, and clicking the current rating again clears it. Show the chosen rating below.",
+      starter: "import { useState } from 'react';\n\nfunction StarRating({ max = 5, value, onChange }) {\n  return (\n    <div>\n      {Array.from({ length: max }, (_, i) => (\n        <span key={i} style={{ fontSize: 28 }}>☆</span>\n      ))}\n    </div>\n  );\n}\n\nexport default function App() {\n  const [rating, setRating] = useState(0);\n  return (\n    <div>\n      <StarRating value={rating} onChange={setRating} />\n      <p>Rating: {rating} / 5</p>\n    </div>\n  );\n}\n",
+    },
+    'm12': {
+      react: true,
+      task: "As the user types, search https://dummyjson.com/products/search?q=… and list the product titles. Wait until typing pauses (about 400 ms) before calling the API. Handle loading, errors and no results.",
+      starter: "import { useEffect, useState } from 'react';\n\nexport default function ProductSearch() {\n  const [query, setQuery] = useState('');\n  const [results, setResults] = useState([]);\n\n  return (\n    <div>\n      <input value={query} onChange={e => setQuery(e.target.value)} placeholder=\"Search products…\" />\n      <ul>{results.map(p => <li key={p.id}>{p.title}</li>)}</ul>\n    </div>\n  );\n}\n",
+    },
+    'm13': {
+      react: true,
+      task: "Show products from https://dummyjson.com/products?limit=20&skip=… inside a scrollable box. Load the next 20 when the user scrolls near the bottom, and stop when there are no more. Handle loading and errors.",
+      starter: "import { useEffect, useRef, useState } from 'react';\n\nconst PAGE_SIZE = 20;\n\nexport default function InfiniteList() {\n  const [items, setItems] = useState([]);\n  const [page, setPage] = useState(0);\n\n  return (\n    <div style={{ height: 300, overflowY: 'auto', border: '1px solid #ccc' }}>\n      <ul>{items.map(p => <li key={p.id}>{p.title}</li>)}</ul>\n    </div>\n  );\n}\n",
+    },
+    'm14': {
+      react: true,
+      task: "Build a sign-up form with name, email, password and confirm password. Show an error under a field after the user leaves it, or on submit. Only submit when everything is valid, then show a thank-you message.",
+      starter: "import { useState } from 'react';\n\nexport default function SignupForm() {\n  return (\n    <form>\n      <label>Name <input name=\"name\" /></label><br />\n      <label>Email <input name=\"email\" type=\"email\" /></label><br />\n      <label>Password <input name=\"password\" type=\"password\" /></label><br />\n      <label>Confirm password <input name=\"confirm\" type=\"password\" /></label><br />\n      <button>Sign up</button>\n    </form>\n  );\n}\n",
+    },
+    'm15': {
+      react: true,
+      task: "Show a stopwatch (mm:ss.cc) with Start / Pause, Lap and Reset. Pausing and starting again should carry on from the same time.",
+      starter: "import { useEffect, useRef, useState } from 'react';\n\nexport default function Stopwatch() {\n  const [elapsed, setElapsed] = useState(0);\n\n  return (\n    <div>\n      <h2>00:00.00</h2>\n      <button>Start</button>\n      <button>Lap</button>\n      <button>Reset</button>\n    </div>\n  );\n}\n",
+    },
+    'm16': {
+      react: true,
+      task: "Show 6 boxes for a one-time code. Typing a digit moves to the next box, Backspace moves back, pasting a code fills all boxes, and a callback gets the full code when every box is filled.",
+      starter: "import { useRef, useState } from 'react';\n\nfunction OtpInput({ length = 6, onComplete }) {\n  return (\n    <div style={{ display: 'flex', gap: 8 }}>\n      {Array.from({ length }, (_, i) => (\n        <input key={i} style={{ width: 40, height: 48, textAlign: 'center', fontSize: 20 }} />\n      ))}\n    </div>\n  );\n}\n\nexport default function App() {\n  const [code, setCode] = useState('');\n  return (\n    <div>\n      <OtpInput onComplete={setCode} />\n      {code && <p>Entered: {code}</p>}\n    </div>\n  );\n}\n",
+    },
+    'm17': {
+      react: true,
+      task: "Render the nested folder data as a tree. Clicking a folder opens or closes it; files just show their name. Indent each level.",
+      starter: "import { useState } from 'react';\n\nconst TREE = {\n  name: 'project',\n  children: [\n    { name: 'src', children: [\n      { name: 'components', children: [{ name: 'Button.jsx' }, { name: 'Modal.jsx' }] },\n      { name: 'App.jsx' },\n      { name: 'index.js' },\n    ] },\n    { name: 'public', children: [{ name: 'index.html' }] },\n    { name: 'package.json' },\n  ],\n};\n\nexport default function FileExplorer() {\n  return <p>{TREE.name}</p>;\n}\n",
+    },
+    'm18': {
+      react: true,
+      task: "Show one image at a time with Previous / Next arrows and a dot for each slide. Move to the next slide every 3 seconds, pause while the mouse is over it, and wrap around at both ends.",
+      starter: "import { useEffect, useState } from 'react';\n\nconst SLIDES = [1015, 1016, 1018, 1019].map((id, i) => ({\n  src: `https://picsum.photos/id/${id}/600/300`,\n  alt: `Landscape photo ${i + 1}`,\n}));\n\nfunction Carousel({ slides }) {\n  return (\n    <div style={{ maxWidth: 600 }}>\n      <img src={slides[0].src} alt={slides[0].alt} style={{ width: '100%', display: 'block' }} />\n      <button>‹</button>\n      <button>›</button>\n    </div>\n  );\n}\n\nexport default function App() {\n  return <Carousel slides={SLIDES} />;\n}\n",
+    },
+    'm19': {
+      react: true,
+      task: "Show a traffic light that stays red for 4 s, then green for 3 s, then yellow for 1 s, and repeats.",
+      starter: "import { useEffect, useState } from 'react';\n\nexport default function TrafficLight() {\n  const [current, setCurrent] = useState('red');\n\n  return (\n    <div style={{ display: 'inline-flex', flexDirection: 'column', gap: 8, padding: 12, background: '#111', borderRadius: 12 }}>\n      {['red', 'yellow', 'green'].map(name => (\n        <div key={name} style={{ width: 56, height: 56, borderRadius: '50%', background: name, opacity: 0.2 }} />\n      ))}\n    </div>\n  );\n}\n",
+    },
+    'm20': {
+      react: true,
+      task: "Build a `ToastProvider` and a `useToast()` hook. Calling `toast.show(message, { type })` shows a coloured toast in the top-right corner that disappears after 3 seconds or when its × is clicked.",
+      starter: "import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';\n\nconst ToastContext = createContext(null);\n\nfunction ToastProvider({ children }) {\n  return <ToastContext.Provider value={null}>{children}</ToastContext.Provider>;\n}\n\nfunction useToast() {\n  return useContext(ToastContext);\n}\n\nfunction Demo() {\n  const toast = useToast();\n  return (\n    <div>\n      <button>Success</button>\n      <button>Error</button>\n      <button>Info</button>\n    </div>\n  );\n}\n\nexport default function App() {\n  return (\n    <ToastProvider>\n      <Demo />\n    </ToastProvider>\n  );\n}\n",
+    },
     // ---------- HTML & CSS (live preview) ----------
     'hc1': {
       html: true,

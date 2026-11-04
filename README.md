@@ -4,12 +4,12 @@
 
 # Frontend Interview Prep
 
-**269 frontend interview questions with clear answers. Practise, check yourself, track your progress and star questions to review later.**
+**283 frontend interview questions with clear answers. Practise, check yourself, track your progress and star questions to review later.**
 
 [**Open the live app →**](https://frontend-interview-prepare.vercel.app)
 
 [![Deployed on Vercel](https://img.shields.io/badge/deployed%20on-Vercel-000?logo=vercel&logoColor=white)](https://frontend-interview-prepare.vercel.app)
-![Questions](https://img.shields.io/badge/questions-269-4f46e5)
+![Questions](https://img.shields.io/badge/questions-283-4f46e5)
 ![No dependencies](https://img.shields.io/badge/dependencies-0-059669)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 
@@ -39,7 +39,7 @@ Questions are grouped into tracks. Most tracks have a **Theory** tab and a **Cod
 |-------|------|:---------:|
 | JavaScript | Theory (29) · Coding (18) | 47 |
 | TypeScript | Theory (22) · Coding (6) | 28 |
-| React | Theory (88) · Coding (6) | 94 |
+| React | Theory (88) · Coding (20) | 108 |
 | Next.js | Theory | 25 |
 | HTML & CSS | Theory (38) · Coding (10) | 48 |
 | System design & behavioural | Architecture (13) · Behavioural (14) | 27 |
