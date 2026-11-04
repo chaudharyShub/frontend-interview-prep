@@ -29,10 +29,11 @@
   <meta name="twitter:image" content="https://frontend-interview-prepare.vercel.app/assets/og-image.png">
 
   <!-- Structured data for search engines (data blocks, so the security policy allows them). -->
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"Frontend Interview Prep","url":"https://frontend-interview-prepare.vercel.app/","description":"269 frontend interview questions with clear answers, coding challenges and progress tracking."}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"Organization","@id":"https://frontend-interview-prepare.vercel.app/#organization","name":"Frontend Interview Prep","url":"https://frontend-interview-prepare.vercel.app/","logo":{"@type":"ImageObject","url":"https://frontend-interview-prepare.vercel.app/assets/favicon-192.png","width":192,"height":192},"sameAs":["https://github.com/chaudharyShub/frontend-interview-prep"]}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"Frontend Interview Prep","url":"https://frontend-interview-prepare.vercel.app/","description":"269 frontend interview questions with clear answers, coding challenges and progress tracking.","publisher":{"@id":"https://frontend-interview-prepare.vercel.app/#organization"}}</script>
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"Frontend Interview Prep","url":"https://frontend-interview-prepare.vercel.app/app","applicationCategory":"EducationalApplication","operatingSystem":"Any (web browser)","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"author":{"@type":"Person","name":"Shubham Chaudhary","url":"https://shubhamworks.vercel.app/"}}</script>
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[
-    {"@type":"Question","name":"Is Frontend Interview Prep free?","acceptedAnswer":{"@type":"Answer","text":"Yes. Every question, answer and coding challenge is free, with no sign-up, no ads and no tracking."}},
+    {"@type":"Question","name":"Is Frontend Interview Prep free?","acceptedAnswer":{"@type":"Answer","text":"Yes. Every question, answer and coding challenge is free, with no sign-up, no ads and no cookies. Visits are only counted anonymously."}},
     {"@type":"Question","name":"Do I need an account?","acceptedAnswer":{"@type":"Answer","text":"No. Your ticks, stars and code drafts are saved in your own browser, so nothing leaves your device."}},
     {"@type":"Question","name":"What level are the questions for?","acceptedAnswer":{"@type":"Answer","text":"Mid- to senior-level frontend roles, roughly 2 to 4 years of experience. Each track starts with fundamentals and moves on to the follow-up questions interviewers ask experienced candidates."}},
     {"@type":"Question","name":"Which topics are covered?","acceptedAnswer":{"@type":"Answer","text":"JavaScript (theory and coding), TypeScript (theory and coding), React (theory and machine coding), Next.js, HTML and CSS (theory and layout challenges), and frontend system design with behavioural questions."}},
@@ -180,7 +181,7 @@
           <div class="lp-feature"><h3>Progress that sticks</h3><p>Ticks, stars and code drafts are saved in your browser. Pick up where you left off, with no account.</p></div>
           <div class="lp-feature"><h3>Search everything</h3><p>Search every question and answer across all tracks. Press <kbd class="kbd">/</kbd> to jump straight to it.</p></div>
           <div class="lp-feature"><h3>Light and dark</h3><p>Follows your system theme, keyboard friendly, and respects reduced motion.</p></div>
-          <div class="lp-feature"><h3>Private and open source</h3><p>No ads, no tracking, no third-party requests. The code is <a href="https://github.com/chaudharyShub/frontend-interview-prep" target="_blank" rel="noopener">on GitHub</a>.</p></div>
+          <div class="lp-feature"><h3>Private and open source</h3><p>No ads, no cookies and no personal data. Visits are counted anonymously with Vercel Web Analytics. The code is <a href="https://github.com/chaudharyShub/frontend-interview-prep" target="_blank" rel="noopener">on GitHub</a>.</p></div>
         </div>
       </div>
     </section>
@@ -189,7 +190,7 @@
       <div class="container lp-narrow">
         <h2 class="lp-h" id="faq-h">Frequently asked questions</h2>
         <div class="lp-faq">
-          <details><summary>Is Frontend Interview Prep free?</summary><p>Yes. Every question, answer and coding challenge is free, with no sign-up, no ads and no tracking.</p></details>
+          <details><summary>Is Frontend Interview Prep free?</summary><p>Yes. Every question, answer and coding challenge is free, with no sign-up, no ads and no cookies. Visits are only counted anonymously.</p></details>
           <details><summary>Do I need an account?</summary><p>No. Your ticks, stars and code drafts are saved in your own browser, so nothing leaves your device.</p></details>
           <details><summary>What level are the questions for?</summary><p>Mid- to senior-level frontend roles, roughly 2 to 4 years of experience. Each track starts with fundamentals and moves on to the follow-up questions interviewers ask experienced candidates.</p></details>
           <details><summary>Which topics are covered?</summary><p>JavaScript (theory and coding), TypeScript (theory and coding), React (theory and machine coding), Next.js, HTML and CSS (theory and layout challenges), and frontend system design with behavioural questions.</p></details>
@@ -231,5 +232,9 @@
 
   <script src="/assets/js/landing.js" defer></script>
   <script src="/assets/js/pwa.js" defer></script>
+  <!-- Vercel Web Analytics (anonymous, cookie-free visit counts) and Speed Insights (page speed).
+       Both are served from this site, so the CSP is unchanged. -->
+  <script src="/_vercel/insights/script.js" defer></script>
+  <script src="/_vercel/speed-insights/script.js" defer></script>
 </body>
 </html>
