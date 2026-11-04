@@ -54,6 +54,8 @@ self.addEventListener('fetch', (event) => {
   const url = new URL(req.url);
   // Only same-origin GETs. Calls to the public test APIs from the React preview pass straight through.
   if (req.method !== 'GET' || url.origin !== location.origin) return;
+  // Leave Vercel's analytics files alone (never cache them).
+  if (url.pathname.startsWith('/_vercel/')) return;
 
   event.respondWith(
     fetch(req)

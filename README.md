@@ -57,7 +57,7 @@ Questions are grouped into tracks. Most tracks have a **Theory** tab and a **Cod
 - **Installable and works offline** – install it from the browser's address bar (or "Add to Home Screen" on a phone). Questions, answers and the JavaScript runner work without a connection.
 - **Copy buttons** on code examples.
 - **Accessible** – keyboard friendly, proper ARIA states, respects reduced-motion.
-- **Fast and private** – plain HTML, CSS and JavaScript. No build step, no tracking, no third-party requests (except the public test APIs that your own React code calls in the preview).
+- **Fast and private** – plain HTML, CSS and JavaScript. No build step, no cookies, no third-party requests (except the public test APIs that your own React code calls in the preview). Visits and page speed are measured anonymously with [Vercel Web Analytics](https://vercel.com/docs/analytics) and [Speed Insights](https://vercel.com/docs/speed-insights), which are served from the same site and set no cookies.
 
 ## Run locally
 
