@@ -100,13 +100,13 @@ The pages load their files from the site root (`/assets/…`), so opening the HT
 │   ├── icon-maskable-512.png
 │   ├── js/pwa.js           # Registers the service worker
 │   ├── apple-touch-icon.png
-│   └── og-image.png        # Link preview image
+│   └── og-image.png        # Link preview image (made from docs/og-image.html)
 ├── favicon.ico             # 16, 32 and 48 px icon at the site root
 ├── manifest.webmanifest    # Makes the app installable (name, icons, start page)
 ├── sw.js                   # Service worker: network first, saved copies when offline
 ├── react-preview.html      # Page loaded in a sandboxed iframe for React previews
 ├── html-preview.html       # Page loaded in a sandboxed iframe for HTML & CSS previews
-├── docs/                   # README screenshots
+├── docs/                   # README screenshots and og-image.html, the link-preview source
 ├── serve.json              # App page addresses for `npx serve`
 ├── sitemap.xml             # Pages for search engines: /, /app and each track page
 └── vercel.json             # App page addresses, redirects from the old /react-style URLs, security headers and caching
