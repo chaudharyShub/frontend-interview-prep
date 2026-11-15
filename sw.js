@@ -6,7 +6,7 @@
 //
 // Bump VERSION when the PRECACHE list changes; old caches are deleted on activate.
 
-const VERSION = 'fip-v2';
+const VERSION = 'fip-v3';
 
 const PRECACHE = [
   '/',
@@ -19,6 +19,7 @@ const PRECACHE = [
   '/assets/css/landing.css',
   '/assets/js/theme.js',
   '/assets/js/pwa.js',
+  '/assets/js/insights.js',
   '/assets/js/landing.js',
   '/assets/js/tracks/javascript.js',
   '/assets/js/tracks/typescript.js',
