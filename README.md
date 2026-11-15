@@ -177,7 +177,7 @@ Also:
 
 - [Git, Drawn Out](https://git-drawn-out.vercel.app/): a visual field guide to Git
 - [CloudPrep](https://aws-cloud-prepare.vercel.app/): practice exams for three AWS certifications
-- [All projects](https://shubhamworks.vercel.app/)
+- [All projects](https://shubhamworks.vercel.app/projects)
 
 ## License
 
