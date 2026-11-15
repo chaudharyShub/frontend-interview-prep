@@ -169,12 +169,15 @@ Spotted a mistake or have a question worth adding? [Open an issue](https://githu
 
 The site is deployed on [Vercel](https://vercel.com). Every push to `main` goes live automatically; no build settings are needed.
 
-## More from the author
+## Made by
 
-Frontend Interview Prep is a **Shubham Works** project. Every site shares the same small footer block, so they read as one family.
+Frontend Interview Prep is a **Shubham Works** project, made by [Shubham Chaudhary](https://shubhamworks.vercel.app/).
 
-- [Portfolio](https://shubhamworks.vercel.app/)
-- [CloudPrep](https://aws-cloud-prepare.vercel.app/): AWS Cloud Practitioner practice exams
+Also:
+
+- [Git, Drawn Out](https://git-drawn-out.vercel.app/): a visual field guide to Git
+- [CloudPrep](https://aws-cloud-prepare.vercel.app/): practice exams for three AWS certifications
+- [All projects](https://shubhamworks.vercel.app/)
 
 ## License
 
